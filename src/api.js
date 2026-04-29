@@ -1,4 +1,4 @@
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API = process.env.REACT_APP_API_URL || 'http://https://rental-system-backend-1t05.onrender.com:5000';
 
 export const getToken = () => {
   const t = localStorage.getItem('token');
