@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import MpesaPayButton from './MpesaPayButton';
 
-const API = "http://localhost:5000";
+const API = "https://rental-system-backend-1t05.onrender.com";
 const ADMIN_NAME = "Isaac Wekesa";
 
 /* ══════════════════════════════════════════════
