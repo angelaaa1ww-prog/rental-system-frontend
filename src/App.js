@@ -300,6 +300,7 @@ export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("ghv-theme")==="dark");
   const T = dark ? DARK : LIGHT;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     injectStyles(T);
     localStorage.setItem("ghv-theme", dark?"dark":"light");
@@ -416,6 +417,7 @@ export default function App() {
     setDataLoading(false); isFetching.current=false;
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn]);
 
   /* ── login ── */

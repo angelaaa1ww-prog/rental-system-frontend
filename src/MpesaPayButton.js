@@ -13,7 +13,7 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
   const [amount, setAmount]       = useState("");
   const [loading, setLoading]     = useState(false);
   const [status, setStatus]       = useState(null);
-  const [checkoutId, setCheckoutId] = useState(null);
+  const [_checkoutId, setCheckoutId] = useState(null);
   const [polling, setPolling]     = useState(false);
   const [result, setResult]       = useState(null);
 
