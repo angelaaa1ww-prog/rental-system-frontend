@@ -4,9 +4,6 @@ import MpesaPayButton from './MpesaPayButton';
 const API = "https://rental-system-backend-1t05.onrender.com";
 const ADMIN_NAME = "Isaac Wekesa";
 
-/* ══════════════════════════════════════════════
-   THEME TOKENS
-══════════════════════════════════════════════ */
 const LIGHT = {
   bg:"#F0F7F4", sidebar:"#0A2E1C", card:"#ffffff", cardBorder:"#D8EDE3",
   topbar:"#ffffff", topbarBorder:"#D8EDE3", text:"#0A2E1C", subtext:"#6B8F7A",
@@ -22,9 +19,6 @@ const DARK = {
   modalBg:"rgba(0,0,0,0.72)",
 };
 
-/* ══════════════════════════════════════════════
-   INJECT STYLES ONCE
-══════════════════════════════════════════════ */
 function injectStyles(T) {
   let el = document.getElementById("ghv-styles");
   if (!el) { el = document.createElement("style"); el.id = "ghv-styles"; document.head.appendChild(el); }
@@ -38,7 +32,6 @@ function injectStyles(T) {
     @keyframes shimmer {0%{background-position:200% 0}100%{background-position:-200% 0}}
     @keyframes modalIn {from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}}
     @keyframes glow    {0%,100%{text-shadow:0 0 20px rgba(212,160,23,0.4)}50%{text-shadow:0 0 50px rgba(212,160,23,0.9)}}
-    @keyframes spin    {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
     .ghv-title{
       font-family:'Playfair Display',serif;
@@ -47,7 +40,6 @@ function injectStyles(T) {
       background-clip:text;animation:glow 3s ease-in-out infinite;
     }
 
-    /* ── inputs ── */
     .inp{
       width:100%;padding:11px 14px;border:1.5px solid ${T.inputBorder};border-radius:10px;
       font-size:14px;font-family:'DM Sans',sans-serif;outline:none;
@@ -57,7 +49,6 @@ function injectStyles(T) {
     .inp[readonly]{opacity:0.6;cursor:default;}
     textarea.inp{resize:vertical;}
 
-    /* ── buttons ── */
     .btn-primary{
       padding:11px 22px;background:linear-gradient(135deg,#0A7A4B,#1DB87A);color:white;
       border:none;border-radius:10px;font-size:14px;font-weight:700;
@@ -126,7 +117,6 @@ function injectStyles(T) {
     }
     .btn-theme:hover{border-color:${T.accent};transform:rotate(15deg);}
 
-    /* ── nav ── */
     .nav-item{
       display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;
       margin-bottom:3px;font-size:14px;font-weight:500;cursor:pointer;
@@ -137,11 +127,9 @@ function injectStyles(T) {
     .nav-item.danger{color:#E07070;}
     .nav-item.danger:hover{background:rgba(224,112,112,0.1);}
 
-    /* ── card hover ── */
     .card-h{transition:box-shadow 0.2s,transform 0.2s;}
     .card-h:hover{box-shadow:0 8px 32px rgba(0,0,0,0.12);transform:translateY(-2px);}
 
-    /* ── search ── */
     .sinp{
       padding:10px 14px 10px 40px;border:1.5px solid ${T.inputBorder};border-radius:10px;
       font-size:14px;font-family:'DM Sans',sans-serif;outline:none;
@@ -149,14 +137,12 @@ function injectStyles(T) {
     }
     .sinp:focus{border-color:${T.accent};}
 
-    /* ── skeleton ── */
     .sk{
       background:linear-gradient(90deg,${T.cardBorder} 25%,${T.rowAlt} 50%,${T.cardBorder} 75%);
       background-size:200% 100%;animation:shimmer 1.5s infinite;
       border-radius:8px;display:block;
     }
 
-    /* ── modal ── */
     .modal-ov{
       position:fixed;inset:0;background:${T.modalBg};
       display:flex;align-items:center;justify-content:center;
@@ -171,32 +157,59 @@ function injectStyles(T) {
 
     .tag{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;}
 
-    /* ── scrollbars ── */
     ::-webkit-scrollbar{width:6px;height:6px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:${T.cardBorder};border-radius:99px;}
     ::-webkit-scrollbar-thumb:hover{background:${T.accent};}
 
-    /* ── print ── */
     @media print{
       .no-print{display:none!important;}
       body{background:white!important;color:black!important;overflow:auto!important;}
     }
 
-    /* ── mobile ── */
+    /* ── MOBILE FIX ── */
+    .sidebar-wrap{
+      width:250px;
+      background:${T.sidebar};
+      display:flex;
+      flex-direction:column;
+      flex-shrink:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      transition:transform 0.3s ease;
+    }
+
     @media(max-width:768px){
-      .sidebar-wrap{position:fixed;z-index:200;height:100vh;transform:translateX(-100%);transition:transform 0.3s;}
-      .sidebar-wrap.open{transform:translateX(0);}
-      .mob-full{width:100%!important;}
-      .mob-col{flex-direction:column!important;}
-      .mob-grid1{grid-template-columns:1fr!important;}
+      .sidebar-wrap{
+        position:fixed;
+        top:0;left:0;
+        height:100vh;
+        z-index:300;
+        transform:translateX(-100%);
+      }
+      .sidebar-wrap.open{
+        transform:translateX(0);
+        box-shadow:4px 0 24px rgba(0,0,0,0.4);
+      }
+      .mobile-pad{padding:16px 14px!important;}
+      .mobile-grid1{grid-template-columns:1fr!important;}
+      .mobile-hide{display:none!important;}
+    }
+
+    @media(min-width:769px){
+      .sidebar-wrap{
+        position:relative;
+        transform:none!important;
+      }
+      .sidebar-wrap.closed{
+        width:0;
+        overflow:hidden;
+        padding:0;
+      }
     }
   `;
 }
 
-/* ══════════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════════ */
 let _tid = 0;
 function useToast() {
   const [toasts, setToasts] = useState([]);
@@ -207,6 +220,7 @@ function useToast() {
   }, []);
   return {toasts, show};
 }
+
 function Toasts({toasts}) {
   return (
     <div style={{position:"fixed",top:20,right:20,zIndex:9999,display:"flex",flexDirection:"column",gap:8}}>
@@ -214,7 +228,7 @@ function Toasts({toasts}) {
         <div key={t.id} style={{
           padding:"13px 20px",borderRadius:12,fontSize:14,fontWeight:600,
           background:t.type==="success"?"linear-gradient(135deg,#0A7A4B,#1DB87A)":t.type==="error"?"linear-gradient(135deg,#A32D2D,#E24B4A)":"linear-gradient(135deg,#1459A0,#2D7DD2)",
-          color:"white",boxShadow:"0 8px 28px rgba(0,0,0,0.3)",minWidth:260,
+          color:"white",boxShadow:"0 8px 28px rgba(0,0,0,0.3)",minWidth:240,
           animation:"slideIn 0.3s ease",display:"flex",alignItems:"center",gap:10,
         }}>
           <span style={{fontSize:18}}>{t.type==="success"?"✓":t.type==="error"?"✕":"ℹ"}</span>
@@ -225,9 +239,6 @@ function Toasts({toasts}) {
   );
 }
 
-/* ══════════════════════════════════════════════
-   MODAL
-══════════════════════════════════════════════ */
 function Modal({title, onClose, children, T}) {
   return (
     <div className="modal-ov" onClick={e => e.target===e.currentTarget&&onClose()}>
@@ -242,9 +253,6 @@ function Modal({title, onClose, children, T}) {
   );
 }
 
-/* ══════════════════════════════════════════════
-   SKELETON
-══════════════════════════════════════════════ */
 function SkeletonCard() {
   return (
     <div style={{padding:"20px",borderRadius:16,border:"1px solid #d8ede3",background:"white",marginBottom:12}}>
@@ -261,9 +269,6 @@ function SkeletonCard() {
   );
 }
 
-/* ══════════════════════════════════════════════
-   TINY HELPERS
-══════════════════════════════════════════════ */
 function Av({name, size=30}) {
   return (
     <div style={{width:size,height:size,minWidth:size,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:"50%",display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:size*0.42,color:"white",marginRight:8,boxShadow:"0 2px 8px rgba(10,122,75,0.3)"}}>
@@ -292,9 +297,6 @@ function Field({label:lbl, children, labelStyle}) {
   );
 }
 
-/* ══════════════════════════════════════════════
-   MAIN APP
-══════════════════════════════════════════════ */
 export default function App() {
   const {toasts, show} = useToast();
   const [dark, setDark] = useState(() => localStorage.getItem("ghv-theme")==="dark");
@@ -306,14 +308,12 @@ export default function App() {
     localStorage.setItem("ghv-theme", dark?"dark":"light");
   }, [dark]);
 
-  /* ── auth ── */
   const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
   const [loggedIn, setLoggedIn]         = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
-  /* ── data ── */
   const [houses, setHouses]           = useState([]);
   const [tenants, setTenants]         = useState([]);
   const [balances, setBalances]       = useState({});
@@ -323,60 +323,63 @@ export default function App() {
   const [reminders, setReminders]     = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
 
-  /* ── house form ── */
   const [houseNumber, setHouseNumber] = useState('');
   const [location, setLocation]       = useState('');
   const [rent, setRent]               = useState('');
   const [apartment, setApartment]     = useState('A');
   const [bedrooms, setBedrooms]       = useState(1);
 
-  /* ── tenant form ── */
   const [tName, setTName]   = useState('');
   const [tPhone, setTPhone] = useState('');
   const [tId, setTId]       = useState('');
 
-  /* ── search & filter ── */
   const [tenantSearch, setTenantSearch] = useState('');
   const [houseSearch, setHouseSearch]   = useState('');
   const [houseFilter, setHouseFilter]   = useState('all');
 
-  /* ── modals ── */
-  const [editTenant, setEditTenant]   = useState(null);
-  const [editHouse, setEditHouse]     = useState(null);
+  const [editTenant, setEditTenant]       = useState(null);
+  const [editHouse, setEditHouse]         = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  /* ── profile ── */
-  const [profileTenant, setProfileTenant]   = useState(null);
+  const [profileTenant, setProfileTenant]     = useState(null);
   const [profilePayments, setProfilePayments] = useState([]);
-  const [prevPage, setPrevPage]             = useState('tenants');
+  const [prevPage, setPrevPage]               = useState('tenants');
 
-  /* ── sms ── */
   const [broadcastMsg, setBroadcastMsg]         = useState('');
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [smsSending, setSmsSending]             = useState({});
   const [customMsg, setCustomMsg]               = useState({});
 
-  /* ── reports ── */
   const now = new Date();
   const [repMonth, setRepMonth]     = useState(now.getMonth()+1);
   const [repYear, setRepYear]       = useState(now.getFullYear());
   const [report, setReport]         = useState(null);
   const [repLoading, setRepLoading] = useState(false);
 
-  /* ── nav ── */
-  const [page, setPage]             = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [page, setPage]               = useState('dashboard');
+  // ✅ FIX 1: Start closed on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const isMobile = () => window.innerWidth <= 768;
 
   const isFetching = useRef(false);
   const apartments = ["A","B","C","D","E"];
   const MONTHS     = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  /* ── helpers ── */
   const getToken = () => { const t=localStorage.getItem('token'); return(!t||t==="undefined"||t==="null")?null:t; };
   const authH    = () => { const t=getToken(); return t?{Authorization:`Bearer ${t}`}:{}; };
 
   useEffect(() => { if(getToken()) setLoggedIn(true); }, []);
   useEffect(() => { const m={1:10000,2:15000,3:20000,4:25000}; setRent(m[bedrooms]||''); }, [bedrooms]);
+
+  // ✅ FIX 2: Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) setSidebarOpen(true);
+      else setSidebarOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const safeFetch = async (url, opts={}) => {
     try {
@@ -420,7 +423,12 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn]);
 
-  /* ── login ── */
+  // ✅ FIX 3: Navigate and close sidebar on mobile
+  const navigate = (id) => {
+    setPage(id);
+    if(isMobile()) setSidebarOpen(false);
+  };
+
   const handleLogin = async () => {
     if(!email||!password){show("Enter email and password","error");return;}
     setLoginLoading(true);
@@ -441,7 +449,6 @@ export default function App() {
     setHouses([]);setTenants([]);setBalances({});setDashData(null);setAllPayments([]);
   };
 
-  /* ── add house ── */
   const addHouse = async () => {
     if(!houseNumber||!location||!rent){show("Fill all house fields","error");return;}
     const res=await safeFetch(`${API}/api/houses`,{
@@ -451,7 +458,6 @@ export default function App() {
     if(res){show("House added!","success");setHouseNumber('');setLocation('');setBedrooms(1);setApartment('A');loadAll();}
   };
 
-  /* ── edit house ── */
   const saveEditHouse = async () => {
     const res=await safeFetch(`${API}/api/houses/${editHouse._id}`,{
       method:"PUT",headers:{"Content-Type":"application/json",...authH()},
@@ -460,7 +466,6 @@ export default function App() {
     if(res){show("House updated!","success");setEditHouse(null);loadAll();}
   };
 
-  /* ── add tenant ── */
   const addTenant = async () => {
     if(!tName||!tPhone){show("Name and phone required","error");return;}
     const res=await safeFetch(`${API}/api/tenants`,{
@@ -470,7 +475,6 @@ export default function App() {
     if(res){show("Tenant added!","success");setTName('');setTPhone('');setTId('');loadAll();}
   };
 
-  /* ── edit tenant ── */
   const saveEditTenant = async () => {
     const res=await safeFetch(`${API}/api/tenants/${editTenant._id}`,{
       method:"PUT",headers:{"Content-Type":"application/json",...authH()},
@@ -479,20 +483,14 @@ export default function App() {
     if(res){show("Tenant updated!","success");setEditTenant(null);loadAll();}
   };
 
-  /* ── INSTANT delete ── */
   const handleDelete = async () => {
     if(!confirmDelete) return;
     const {type,id} = confirmDelete;
-
-    // ✅ Remove instantly from UI — no waiting
     if(type==="tenant")  setTenants(p=>p.filter(x=>x._id!==id));
     if(type==="house")   setHouses(p=>p.filter(x=>x._id!==id));
     if(type==="payment") setAllPayments(p=>p.filter(x=>x._id!==id));
-
     setConfirmDelete(null);
     show("Deleted successfully","success");
-
-    // Background delete + refresh
     const urlMap={
       tenant:`${API}/api/tenants/${id}`,
       house:`${API}/api/houses/${id}`,
@@ -502,7 +500,6 @@ export default function App() {
     loadAll();
   };
 
-  /* ── assign house ── */
   const assignHouse = async (tenantId,houseId) => {
     if(!houseId) return;
     const house=houses.find(h=>h._id===houseId);
@@ -514,7 +511,6 @@ export default function App() {
     if(res){show("House assigned!","success");loadAll();}
   };
 
-  /* ── payment ── */
   const makePayment = async (tenantId) => {
     const amount=Number(amounts[tenantId]);
     if(!amount||amount<=0){show("Enter a valid amount","error");return;}
@@ -525,7 +521,6 @@ export default function App() {
     if(res){show("Payment recorded!","success");setAmounts(p=>({...p,[tenantId]:''}));loadAll();}
   };
 
-  /* ── tenant profile ── */
   const openProfile = async (tenant) => {
     setPrevPage(page);
     setProfileTenant(tenant);
@@ -533,11 +528,11 @@ export default function App() {
     const filtered=(pays||[]).filter(p=>String(p.tenant?._id||p.tenant)===String(tenant._id));
     setProfilePayments(filtered);
     setPage('profile');
+    if(isMobile()) setSidebarOpen(false);
   };
 
   const goBack = () => setPage(prevPage);
 
-  /* ── sms ── */
   const sendSMS = async (tenantId,ph) => {
     const msg=customMsg[tenantId]||`Dear tenant, your rent is due. Please pay promptly to avoid penalties. Thank you. - Gifted Hands Ventures`;
     setSmsSending(p=>({...p,[tenantId]:true}));
@@ -560,7 +555,6 @@ export default function App() {
     if(res){show(`Sent to ${res.sent} tenants!`,"success");setBroadcastMsg('');}
   };
 
-  /* ── report ── */
   const loadReport = async () => {
     setRepLoading(true);
     const res=await safeFetch(`${API}/api/reports/monthly?month=${repMonth}&year=${repYear}`,{headers:authH()});
@@ -568,7 +562,6 @@ export default function App() {
     if(res) setReport(res);
   };
 
-  /* ── filtered lists ── */
   const filteredTenants = tenants.filter(t =>
     t.name?.toLowerCase().includes(tenantSearch.toLowerCase())||
     t.phone?.includes(tenantSearch)||
@@ -580,47 +573,36 @@ export default function App() {
     return ms&&mf;
   });
 
-  /* ── style shorthand ── */
   const C  = (extra={}) => ({background:T.card,borderRadius:16,border:`1px solid ${T.cardBorder}`,padding:"22px 24px",marginBottom:18,...extra});
   const CT = {fontSize:16,fontWeight:700,color:T.text,margin:"0 0 18px"};
   const TH = {textAlign:"left",padding:"10px 14px",fontSize:11,fontWeight:700,color:T.subtext,borderBottom:`2px solid ${T.cardBorder}`,whiteSpace:"nowrap",textTransform:"uppercase",letterSpacing:"0.7px"};
   const TD = {padding:"12px 14px",verticalAlign:"middle",color:T.text};
 
-  /* ══════════════════════════════════════════════
-     LOGIN PAGE
-  ══════════════════════════════════════════════ */
   if(!loggedIn) return (
     <>
       <Toasts toasts={toasts}/>
       <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:dark?"linear-gradient(135deg,#040E09,#071510)":"linear-gradient(135deg,#0A2E1C,#1A5C38)",position:"relative",overflow:"hidden"}}>
-        {/* Decorative rings */}
         {[...Array(5)].map((_,i)=>(
           <div key={i} style={{position:"absolute",borderRadius:"50%",border:"1px solid rgba(212,160,23,0.15)",width:180+i*120,height:180+i*120,top:"50%",left:"50%",transform:"translate(-50%,-50%)"}}/>
         ))}
-
         <button className="btn-theme" onClick={()=>setDark(d=>!d)} style={{position:"fixed",top:20,right:20,zIndex:10}}>{dark?"☀️":"🌙"}</button>
-
-        <div style={{background:dark?"rgba(14,35,24,0.97)":"rgba(255,255,255,0.97)",borderRadius:24,padding:"52px 44px",width:420,boxShadow:"0 24px 64px rgba(0,0,0,0.45)",position:"relative",zIndex:1,border:`1px solid ${T.cardBorder}`}}>
-
-          {/* Logo + Brand */}
-          <div style={{textAlign:"center",marginBottom:36}}>
-            <div style={{width:76,height:76,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:22,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:36,boxShadow:"0 8px 28px rgba(10,122,75,0.45)"}}>🏢</div>
-            <h1 className="ghv-title" style={{fontSize:28,letterSpacing:"1px",lineHeight:1.2}}>GIFTED HANDS</h1>
-            <h1 className="ghv-title" style={{fontSize:28,letterSpacing:"1px"}}>VENTURES</h1>
-            <div style={{width:60,height:3,background:`linear-gradient(90deg,${T.gold},transparent)`,margin:"14px auto 10px"}}/>
+        <div style={{background:dark?"rgba(14,35,24,0.97)":"rgba(255,255,255,0.97)",borderRadius:24,padding:"40px 32px",width:"min(420px, 92vw)",boxShadow:"0 24px 64px rgba(0,0,0,0.45)",position:"relative",zIndex:1,border:`1px solid ${T.cardBorder}`}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <div style={{width:72,height:72,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:20,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:34,boxShadow:"0 8px 28px rgba(10,122,75,0.45)"}}>🏢</div>
+            <h1 className="ghv-title" style={{fontSize:26,letterSpacing:"1px",lineHeight:1.2}}>GIFTED HANDS</h1>
+            <h1 className="ghv-title" style={{fontSize:26,letterSpacing:"1px"}}>VENTURES</h1>
+            <div style={{width:60,height:3,background:`linear-gradient(90deg,${T.gold},transparent)`,margin:"12px auto 8px"}}/>
             <p style={{fontSize:13,color:T.subtext}}>Property Management System</p>
           </div>
-
-          {/* Success */}
           {loginSuccess ? (
-            <div style={{textAlign:"center",padding:"24px 0",animation:"fadeUp 0.4s ease"}}>
-              <div style={{fontSize:54,marginBottom:14}}>🎉</div>
+            <div style={{textAlign:"center",padding:"20px 0"}}>
+              <div style={{fontSize:50,marginBottom:12}}>🎉</div>
               <h2 style={{color:"#1DB87A",fontSize:18,fontWeight:600,marginBottom:4}}>Welcome back,</h2>
-              <h2 style={{color:T.gold,fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>{ADMIN_NAME}!</h2>
-              <p style={{color:T.subtext,fontSize:13,marginTop:10}}>Loading your dashboard...</p>
+              <h2 style={{color:T.gold,fontSize:22,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>{ADMIN_NAME}!</h2>
+              <p style={{color:T.subtext,fontSize:13,marginTop:8}}>Loading your dashboard...</p>
             </div>
           ) : (
-            <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
               <Field lbl="Email Address" labelStyle={{color:dark?"#7AAF8A":"#4A6A5A"}}>
                 <input className="inp" type="email" placeholder="admin@rentals.co.ke"
                   value={email} onChange={e=>setEmail(e.target.value)}
@@ -632,13 +614,12 @@ export default function App() {
                   onKeyDown={e=>e.key==="Enter"&&handleLogin()}/>
               </Field>
               <button className="btn-primary" onClick={handleLogin} disabled={loginLoading}
-                style={{marginTop:8,width:"100%",padding:"14px 0",fontSize:15}}>
+                style={{marginTop:6,width:"100%",padding:"13px 0",fontSize:15}}>
                 {loginLoading?"Signing in...":"Sign In →"}
               </button>
             </div>
           )}
-
-          <p style={{textAlign:"center",fontSize:11,color:T.subtext,marginTop:28}}>
+          <p style={{textAlign:"center",fontSize:11,color:T.subtext,marginTop:24}}>
             Gifted Hands Ventures © {new Date().getFullYear()} · All Rights Reserved
           </p>
         </div>
@@ -646,9 +627,6 @@ export default function App() {
     </>
   );
 
-  /* ══════════════════════════════════════════════
-     MAIN LAYOUT
-  ══════════════════════════════════════════════ */
   const navItems = [
     {id:"dashboard",label:"Dashboard",   icon:"📊"},
     {id:"houses",   label:"Houses",      icon:"🏠"},
@@ -665,7 +643,6 @@ export default function App() {
     <>
       <Toasts toasts={toasts}/>
 
-      {/* ── EDIT TENANT MODAL ── */}
       {editTenant&&(
         <Modal title="✏️ Edit Tenant" onClose={()=>setEditTenant(null)} T={T}>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -680,7 +657,6 @@ export default function App() {
         </Modal>
       )}
 
-      {/* ── EDIT HOUSE MODAL ── */}
       {editHouse&&(
         <Modal title="✏️ Edit House" onClose={()=>setEditHouse(null)} T={T}>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -700,7 +676,6 @@ export default function App() {
         </Modal>
       )}
 
-      {/* ── DELETE CONFIRM MODAL ── */}
       {confirmDelete&&(
         <Modal title="⚠️ Confirm Delete" onClose={()=>setConfirmDelete(null)} T={T}>
           <p style={{color:T.subtext,fontSize:14,marginBottom:22,lineHeight:1.7}}>
@@ -713,59 +688,58 @@ export default function App() {
         </Modal>
       )}
 
-      {/* ── LAYOUT ── */}
-      <div style={{display:"flex",height:"100vh",overflow:"hidden"}}>
+      <div style={{display:"flex",height:"100vh",overflow:"hidden",position:"relative"}}>
 
-        {/* ════ SIDEBAR ════ */}
-        <div className={`sidebar-wrap${sidebarOpen?" open":""}`}
-          style={{width:250,background:T.sidebar,display:"flex",flexDirection:"column",flexShrink:0,overflowY:"auto",overflowX:"hidden"}}>
+        {/* ✅ FIX 4: Mobile overlay — tap outside to close sidebar */}
+        {sidebarOpen && isMobile() && (
+          <div onClick={()=>setSidebarOpen(false)}
+            style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:299}}/>
+        )}
 
-          {/* Brand */}
-          <div style={{padding:"24px 20px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:46,height:46,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:13,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:"0 4px 16px rgba(10,122,75,0.4)",flexShrink:0}}>🏢</div>
+        {/* SIDEBAR */}
+        <div className={`sidebar-wrap${sidebarOpen?" open":""}`}>
+          <div style={{padding:"22px 18px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:44,height:44,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 16px rgba(10,122,75,0.4)",flexShrink:0}}>🏢</div>
               <div>
-                <p className="ghv-title" style={{fontSize:11,letterSpacing:"1.5px",lineHeight:1.4}}>GIFTED HANDS</p>
-                <p className="ghv-title" style={{fontSize:11,letterSpacing:"1.5px"}}>VENTURES</p>
+                <p className="ghv-title" style={{fontSize:10,letterSpacing:"1.5px",lineHeight:1.4}}>GIFTED HANDS</p>
+                <p className="ghv-title" style={{fontSize:10,letterSpacing:"1.5px"}}>VENTURES</p>
               </div>
             </div>
           </div>
 
-          {/* Admin welcome */}
-          <div style={{padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+          <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:38,height:38,background:`linear-gradient(135deg,#8B5E00,${T.gold})`,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:14,color:"#0A2E1C",flexShrink:0}}>
+              <div style={{width:36,height:36,background:`linear-gradient(135deg,#8B5E00,${T.gold})`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13,color:"#0A2E1C",flexShrink:0}}>
                 {ADMIN_NAME.split(' ').map(n=>n[0]).join('')}
               </div>
               <div>
                 <p style={{color:"rgba(255,255,255,0.6)",fontSize:11}}>Welcome back,</p>
-                <p style={{color:T.gold,fontSize:13,fontWeight:700}}>{ADMIN_NAME}</p>
+                <p style={{color:T.gold,fontSize:12,fontWeight:700}}>{ADMIN_NAME}</p>
               </div>
             </div>
           </div>
 
-          {/* Quick stats */}
-          <div style={{margin:"14px 12px",background:"rgba(29,184,122,0.08)",borderRadius:12,padding:"12px 14px",flexShrink:0}}>
+          <div style={{margin:"12px 10px",background:"rgba(29,184,122,0.08)",borderRadius:10,padding:"10px 12px",flexShrink:0}}>
             {[
               {l:"Occupied",val:occupiedCount,  c:"#1DB87A"},
               {l:"Vacant",  val:vacantCount,    c:T.gold},
               {l:"Tenants", val:tenants.length, c:"#5B8DEF"},
               {l:"Overdue", val:dashData?.overdueCount??"—",c:"#E07070"},
             ].map(s=>(
-              <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:5}}>
+              <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
                 <span style={{color:"#6B9F7A"}}>{s.l}</span>
                 <span style={{color:s.c,fontWeight:700}}>{s.val}</span>
               </div>
             ))}
           </div>
 
-          {/* Nav */}
-          <nav style={{padding:"0 10px",flex:1}}>
-            <p style={{fontSize:10,fontWeight:700,color:"#2A5A3A",textTransform:"uppercase",letterSpacing:1.5,padding:"0 4px 10px"}}>Navigation</p>
+          <nav style={{padding:"0 8px",flex:1}}>
+            <p style={{fontSize:10,fontWeight:700,color:"#2A5A3A",textTransform:"uppercase",letterSpacing:1.5,padding:"0 6px 8px"}}>Navigation</p>
             {navItems.map(item=>(
               <div key={item.id} className={`nav-item${page===item.id?" active":""}`}
-                onClick={()=>setPage(item.id)}>
-                <span style={{fontSize:18}}>{item.icon}</span>
+                onClick={()=>navigate(item.id)}>
+                <span style={{fontSize:17}}>{item.icon}</span>
                 {item.label}
                 {item.id==="sms"&&reminders.length>0&&(
                   <span style={{marginLeft:"auto",background:"#E07070",color:"white",fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:999}}>{reminders.length}</span>
@@ -774,38 +748,37 @@ export default function App() {
             ))}
           </nav>
 
-          {/* Logout */}
-          <div style={{padding:"12px 10px 22px",flexShrink:0}}>
+          <div style={{padding:"10px 8px 20px",flexShrink:0}}>
             <div className="nav-item danger" onClick={handleLogout}>
-              <span style={{fontSize:18}}>🚪</span> Logout
+              <span style={{fontSize:17}}>🚪</span> Logout
             </div>
           </div>
         </div>
 
-        {/* ════ MAIN ════ */}
-        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",background:T.bg}}>
+        {/* MAIN */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",background:T.bg,minWidth:0}}>
 
           {/* Topbar */}
-          <div className="no-print" style={{background:T.topbar,borderBottom:`1px solid ${T.topbarBorder}`,padding:"13px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,zIndex:50}}>
-            <div style={{display:"flex",alignItems:"center",gap:14}}>
-              <button onClick={()=>setSidebarOpen(o=>!o)} style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:T.subtext,lineHeight:1}}>☰</button>
+          <div className="no-print" style={{background:T.topbar,borderBottom:`1px solid ${T.topbarBorder}`,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,zIndex:50}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <button onClick={()=>setSidebarOpen(o=>!o)}
+                style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:T.subtext,lineHeight:1,padding:"4px",borderRadius:8}}>☰</button>
               <div>
-                <h1 style={{fontSize:18,fontWeight:700,color:T.text}}>
-                  {page==="profile"&&profileTenant?`👤 ${profileTenant.name}'s Profile`:currentNav?`${currentNav.icon} ${currentNav.label}`:""}
+                <h1 style={{fontSize:16,fontWeight:700,color:T.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"40vw"}}>
+                  {page==="profile"&&profileTenant?`👤 ${profileTenant.name}`:currentNav?`${currentNav.icon} ${currentNav.label}`:""}
                 </h1>
-                <p style={{fontSize:11,color:T.subtext,marginTop:1}}>
-                  {new Date().toLocaleDateString("en-KE",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+                <p style={{fontSize:10,color:T.subtext,marginTop:1}}>
+                  {new Date().toLocaleDateString("en-KE",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}
                 </p>
               </div>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
               {reminders.length>0&&(
-                <div style={{background:"#FCEBEB",color:"#A32D2D",fontSize:12,fontWeight:700,padding:"5px 12px",borderRadius:999}}>⚠️ {reminders.length} due soon</div>
+                <div style={{background:"#FCEBEB",color:"#A32D2D",fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:999}}>⚠️ {reminders.length}</div>
               )}
-              <button className="btn-outline" onClick={loadAll}>↻ Refresh</button>
-              <button className="btn-outline" onClick={()=>window.print()}>🖨️ Print</button>
+              <button className="btn-outline" onClick={loadAll} style={{padding:"6px 12px",fontSize:12}}>↻</button>
               <button className="btn-theme" onClick={()=>setDark(d=>!d)}>{dark?"☀️":"🌙"}</button>
-              <div style={{width:36,height:36,background:`linear-gradient(135deg,#8B5E00,${T.gold})`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:"#0A2E1C",fontSize:13}}>
+              <div style={{width:32,height:32,background:`linear-gradient(135deg,#8B5E00,${T.gold})`,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,color:"#0A2E1C",fontSize:12}}>
                 {ADMIN_NAME.split(' ').map(n=>n[0]).join('')}
               </div>
             </div>
@@ -813,19 +786,18 @@ export default function App() {
 
           {/* Scrollable content */}
           <div style={{flex:1,overflowY:"auto",overflowX:"hidden"}}>
-            <div style={{padding:"24px 28px",maxWidth:1100,margin:"0 auto"}}>
+            <div style={{padding:"16px",maxWidth:1100,margin:"0 auto"}}>
 
-              {/* ════ DASHBOARD ════ */}
+              {/* DASHBOARD */}
               {page==="dashboard"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   {dataLoading?(
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:14,marginBottom:22}}>
-                      {[...Array(6)].map((_,i)=><span key={i} className="sk" style={{height:110,borderRadius:16}}/>)}
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:12,marginBottom:18}}>
+                      {[...Array(6)].map((_,i)=><span key={i} className="sk" style={{height:100,borderRadius:14}}/>)}
                     </div>
                   ):!dashData?<p style={{color:T.subtext}}>Loading dashboard...</p>:(
                     <>
-                      {/* Stat cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:14,marginBottom:22}}>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:12,marginBottom:18}}>
                         {[
                           {l:"Total Houses", v:dashData.totalHouses,  bg:"linear-gradient(135deg,#0A3D2B,#0A7A4B)",icon:"🏠"},
                           {l:"Occupied",     v:dashData.occupied,     bg:"linear-gradient(135deg,#1459A0,#2D7DD2)",icon:"✅"},
@@ -834,30 +806,28 @@ export default function App() {
                           {l:"Overdue",      v:dashData.overdueCount, bg:dashData.overdueCount>0?"linear-gradient(135deg,#6B1A1A,#D63B3B)":"linear-gradient(135deg,#0A3D2B,#0A7A4B)",icon:dashData.overdueCount>0?"⚠️":"✔️"},
                           {l:"Tenants",      v:tenants.length,        bg:"linear-gradient(135deg,#1A1A6B,#534AB7)",icon:"👤"},
                         ].map(c=>(
-                          <div key={c.l} className="card-h" style={{background:c.bg,borderRadius:16,padding:"20px 18px",boxShadow:"0 4px 20px rgba(0,0,0,0.18)"}}>
-                            <span style={{fontSize:26}}>{c.icon}</span>
-                            <p style={{fontSize:c.sm?16:28,fontWeight:800,color:"white",margin:"8px 0 4px"}}>{c.v}</p>
-                            <p style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.7)"}}>{c.l}</p>
+                          <div key={c.l} className="card-h" style={{background:c.bg,borderRadius:14,padding:"16px 14px",boxShadow:"0 4px 20px rgba(0,0,0,0.18)"}}>
+                            <span style={{fontSize:22}}>{c.icon}</span>
+                            <p style={{fontSize:c.sm?15:24,fontWeight:800,color:"white",margin:"6px 0 3px"}}>{c.v}</p>
+                            <p style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.7)"}}>{c.l}</p>
                           </div>
                         ))}
                       </div>
 
-                      {/* Occupancy bar */}
                       <div style={C()}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
-                          <span style={{fontSize:15,fontWeight:700,color:T.text}}>Occupancy Rate</span>
-                          <span style={{fontSize:20,fontWeight:800,color:T.accent}}>{dashData.occupancyRate}%</span>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                          <span style={{fontSize:14,fontWeight:700,color:T.text}}>Occupancy Rate</span>
+                          <span style={{fontSize:18,fontWeight:800,color:T.accent}}>{dashData.occupancyRate}%</span>
                         </div>
-                        <div style={{background:T.cardBorder,borderRadius:999,height:14,overflow:"hidden"}}>
+                        <div style={{background:T.cardBorder,borderRadius:999,height:12,overflow:"hidden"}}>
                           <div style={{width:`${dashData.occupancyRate}%`,height:"100%",borderRadius:999,transition:"width 1s ease",background:dashData.occupancyRate>=80?"linear-gradient(90deg,#0A7A4B,#1DB87A)":dashData.occupancyRate>=50?"linear-gradient(90deg,#B8800A,#F0C030)":"linear-gradient(90deg,#8B1A1A,#E24B4A)"}}/>
                         </div>
-                        <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:12,color:T.subtext}}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:12,color:T.subtext}}>
                           <span>🟢 {dashData.occupied} occupied</span>
                           <span>🔑 {dashData.available} vacant</span>
                         </div>
                       </div>
 
-                      {/* Overdue */}
                       <div style={C()}>
                         <h2 style={{...CT,display:"flex",alignItems:"center",gap:10}}>
                           Overdue Tenants
@@ -866,7 +836,7 @@ export default function App() {
                         {!dashData.overdueTenants?.length
                           ?<Empty T={T} icon="🎉" text="All tenants are up to date!"/>
                           :<div style={{overflowX:"auto"}}>
-                            <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
+                            <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
                               <thead><tr>{["Tenant","Phone","House","Rent","Paid","Balance"].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                               <tbody>
                                 {dashData.overdueTenants.map((t,i)=>(
@@ -889,12 +859,12 @@ export default function App() {
                 </div>
               )}
 
-              {/* ════ HOUSES ════ */}
+              {/* HOUSES */}
               {page==="houses"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   <div style={C()}>
                     <h2 style={CT}>🏠 Add New House</h2>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:14}}>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
                       <Field lbl="House Number"><input className="inp" placeholder="e.g. A101" value={houseNumber} onChange={e=>setHouseNumber(e.target.value)}/></Field>
                       <Field lbl="Location"><input className="inp" placeholder="e.g. Kiambu Road" value={location} onChange={e=>setLocation(e.target.value)}/></Field>
                       <Field lbl="Apartment">
@@ -914,15 +884,14 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Search + filter */}
-                  <div style={{display:"flex",gap:12,marginBottom:18,flexWrap:"wrap",alignItems:"center"}}>
-                    <div style={{flex:1,minWidth:200,position:"relative"}}>
-                      <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",color:T.subtext,fontSize:16}}>🔍</span>
+                  <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
+                    <div style={{flex:1,minWidth:180,position:"relative"}}>
+                      <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:T.subtext}}>🔍</span>
                       <input className="sinp" placeholder="Search houses..." value={houseSearch} onChange={e=>setHouseSearch(e.target.value)}/>
                     </div>
-                    <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                       {["all","occupied","vacant"].map(f=>(
-                        <button key={f} onClick={()=>setHouseFilter(f)} style={{padding:"10px 18px",borderRadius:10,border:`1.5px solid ${houseFilter===f?T.accent:T.cardBorder}`,background:houseFilter===f?T.accent:"transparent",color:houseFilter===f?"white":T.subtext,fontWeight:600,fontSize:13,cursor:"pointer",transition:"all 0.2s"}}>
+                        <button key={f} onClick={()=>setHouseFilter(f)} style={{padding:"9px 14px",borderRadius:9,border:`1.5px solid ${houseFilter===f?T.accent:T.cardBorder}`,background:houseFilter===f?T.accent:"transparent",color:houseFilter===f?"white":T.subtext,fontWeight:600,fontSize:12,cursor:"pointer",transition:"all 0.2s"}}>
                           {f==="all"?"All":f==="occupied"?"🔒 Occupied":"🔑 Vacant"}
                         </button>
                       ))}
@@ -933,31 +902,33 @@ export default function App() {
                     const apH=filteredHouses.filter(h=>h.apartment===ap);
                     if(!apH.length) return null;
                     return (
-                      <div key={ap} style={{marginBottom:22}}>
-                        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-                          <div style={{width:32,height:32,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:800,fontSize:14,boxShadow:"0 3px 10px rgba(10,122,75,0.3)"}}>{ap}</div>
-                          <h3 style={{fontSize:15,fontWeight:700,color:T.text}}>Apartment {ap}</h3>
+                      <div key={ap} style={{marginBottom:20}}>
+                        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                          <div style={{width:28,height:28,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:800,fontSize:13}}>{ap}</div>
+                          <h3 style={{fontSize:14,fontWeight:700,color:T.text}}>Apartment {ap}</h3>
                           <span style={{fontSize:12,color:T.subtext}}>{apH.length} unit{apH.length!==1?"s":""}</span>
                         </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                        <div style={{display:"flex",flexDirection:"column",gap:8}}>
                           {apH.map(h=>(
-                            <div key={h._id} className="card-h" style={{background:T.card,borderRadius:14,border:`1px solid ${T.cardBorder}`,padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-                              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                                <div style={{width:44,height:44,background:h.status==="occupied"?"linear-gradient(135deg,#6B1A1A,#D63B3B)":"linear-gradient(135deg,#0A3D2B,#0A7A4B)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>
-                                  {h.status==="occupied"?"🔒":"🔑"}
+                            <div key={h._id} style={{background:T.card,borderRadius:12,border:`1px solid ${T.cardBorder}`,padding:"12px 14px"}}>
+                              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+                                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                                  <div style={{width:40,height:40,background:h.status==="occupied"?"linear-gradient(135deg,#6B1A1A,#D63B3B)":"linear-gradient(135deg,#0A3D2B,#0A7A4B)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>
+                                    {h.status==="occupied"?"🔒":"🔑"}
+                                  </div>
+                                  <div>
+                                    <p style={{fontWeight:700,fontSize:14,color:T.text}}>{h.houseNumber}</p>
+                                    <p style={{fontSize:11,color:T.subtext,marginTop:1}}>{h.location} · {h.bedrooms} bed{h.bedrooms>1?"s":""}</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p style={{fontWeight:700,fontSize:15,color:T.text}}>{h.houseNumber}</p>
-                                  <p style={{fontSize:12,color:T.subtext,marginTop:2}}>{h.location} · {h.bedrooms} bed{h.bedrooms>1?"s":""}</p>
+                                <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                                  <p style={{fontWeight:800,fontSize:14,color:T.accent}}>KES {(h.rent||0).toLocaleString()}/mo</p>
+                                  <Tag bg={h.status==="occupied"?"#FCEBEB":"#E1F5EE"} color={h.status==="occupied"?"#A32D2D":"#0F6E56"}>
+                                    {h.status==="occupied"?"Occupied":"Vacant"}
+                                  </Tag>
+                                  <button className="btn-edit" onClick={()=>setEditHouse({...h})}>✏️</button>
+                                  <button className="btn-danger" onClick={()=>setConfirmDelete({type:"house",id:h._id,name:h.houseNumber})}>🗑️</button>
                                 </div>
-                              </div>
-                              <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-                                <p style={{fontWeight:800,fontSize:15,color:T.accent}}>KES {(h.rent||0).toLocaleString()}/mo</p>
-                                <Tag bg={h.status==="occupied"?"#FCEBEB":"#E1F5EE"} color={h.status==="occupied"?"#A32D2D":"#0F6E56"}>
-                                  {h.status==="occupied"?"Occupied":"Vacant"}
-                                </Tag>
-                                <button className="btn-edit" onClick={()=>setEditHouse({...h})}>✏️ Edit</button>
-                                <button className="btn-danger" onClick={()=>setConfirmDelete({type:"house",id:h._id,name:h.houseNumber})}>🗑️</button>
                               </div>
                             </div>
                           ))}
@@ -969,12 +940,12 @@ export default function App() {
                 </div>
               )}
 
-              {/* ════ TENANTS ════ */}
+              {/* TENANTS */}
               {page==="tenants"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   <div style={C()}>
                     <h2 style={CT}>👤 Add New Tenant</h2>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:14}}>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12}}>
                       <Field lbl="Full Name"><input className="inp" placeholder="e.g. John Kamau" value={tName} onChange={e=>setTName(e.target.value)}/></Field>
                       <Field lbl="Phone Number"><input className="inp" placeholder="e.g. 0712345678" value={tPhone} onChange={e=>setTPhone(e.target.value)}/></Field>
                       <Field lbl="ID Number"><input className="inp" placeholder="National ID" value={tId} onChange={e=>setTId(e.target.value)}/></Field>
@@ -984,84 +955,76 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Search */}
-                  <div style={{position:"relative",marginBottom:18}}>
-                    <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",color:T.subtext,fontSize:16}}>🔍</span>
+                  <div style={{position:"relative",marginBottom:14}}>
+                    <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:T.subtext}}>🔍</span>
                     <input className="sinp" placeholder="Search by name, phone or ID..." value={tenantSearch} onChange={e=>setTenantSearch(e.target.value)}/>
                   </div>
 
-                  {/* Tenant count */}
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                    <p style={{fontSize:13,color:T.subtext,fontWeight:600}}>{filteredTenants.length} tenant{filteredTenants.length!==1?"s":""} found</p>
-                  </div>
+                  <p style={{fontSize:12,color:T.subtext,fontWeight:600,marginBottom:12}}>{filteredTenants.length} tenant{filteredTenants.length!==1?"s":""} found</p>
 
                   {dataLoading?[...Array(3)].map((_,i)=><SkeletonCard key={i}/>):(
-                    <div style={{display:"flex",flexDirection:"column",gap:16}}>
+                    <div style={{display:"flex",flexDirection:"column",gap:14}}>
                       {filteredTenants.map(t=>{
                         const bal=balances[t._id]||{rent:0,paid:0,balance:0};
                         const pct=bal.rent>0?Math.min(100,Math.round((bal.paid/bal.rent)*100)):0;
                         return (
-                          <div key={t._id} className="card-h" style={{background:T.card,borderRadius:16,border:`1px solid ${T.cardBorder}`,padding:"20px 22px"}}>
-                            {/* Header row */}
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:16}}>
-                              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                                <div style={{width:50,height:50,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:22,color:"white",boxShadow:"0 4px 14px rgba(10,122,75,0.3)"}}>
+                          <div key={t._id} style={{background:T.card,borderRadius:14,border:`1px solid ${T.cardBorder}`,padding:"16px"}}>
+                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:10,marginBottom:14}}>
+                              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                                <div style={{width:46,height:46,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:20,color:"white"}}>
                                   {t.name?.[0]?.toUpperCase()||"?"}
                                 </div>
                                 <div>
-                                  <p style={{fontWeight:700,fontSize:16,color:T.text}}>{t.name}</p>
+                                  <p style={{fontWeight:700,fontSize:15,color:T.text}}>{t.name}</p>
                                   <p style={{fontSize:12,color:T.subtext,marginTop:2}}>{t.phone}{t.idNumber?` · ID: ${t.idNumber}`:""}</p>
                                 </div>
                               </div>
-                              <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-                                <button className="btn-outline" onClick={()=>openProfile(t)}>👁️ Profile</button>
-                                <button className="btn-edit" onClick={()=>setEditTenant({...t})}>✏️ Edit</button>
+                              <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                                <button className="btn-outline" style={{padding:"7px 12px",fontSize:12}} onClick={()=>openProfile(t)}>👁️ Profile</button>
+                                <button className="btn-edit" onClick={()=>setEditTenant({...t})}>✏️</button>
                                 <button className="btn-danger" onClick={()=>setConfirmDelete({type:"tenant",id:t._id,name:t.name})}>🗑️</button>
-                                <select className="inp" style={{width:"auto",minWidth:180,padding:"8px 12px"}} defaultValue="" onChange={e=>assignHouse(t._id,e.target.value)}>
-                                  <option value="">Assign House</option>
-                                  {houses.filter(h=>h.status==="vacant").map(h=>(
-                                    <option key={h._id} value={h._id}>{h.houseNumber} — KES {(h.rent||0).toLocaleString()}</option>
-                                  ))}
-                                </select>
                               </div>
                             </div>
 
-                            {/* Balance info */}
-                            <div style={{background:T.statRow,borderRadius:12,padding:"14px 16px",marginBottom:14}}>
-                              <div style={{display:"flex",gap:28,flexWrap:"wrap",marginBottom:10}}>
+                            <select className="inp" style={{marginBottom:12}} defaultValue="" onChange={e=>assignHouse(t._id,e.target.value)}>
+                              <option value="">Assign House</option>
+                              {houses.filter(h=>h.status==="vacant").map(h=>(
+                                <option key={h._id} value={h._id}>{h.houseNumber} — KES {(h.rent||0).toLocaleString()}</option>
+                              ))}
+                            </select>
+
+                            <div style={{background:T.statRow,borderRadius:10,padding:"12px 14px",marginBottom:12}}>
+                              <div style={{display:"flex",gap:20,flexWrap:"wrap",marginBottom:8}}>
                                 {[
                                   {l:"Monthly Rent",v:`KES ${(bal.rent||0).toLocaleString()}`,c:"#2D7DD2"},
                                   {l:"Paid",        v:`KES ${(bal.paid||0).toLocaleString()}`,c:"#0A7A4B"},
                                   {l:"Balance",     v:`KES ${(bal.balance||0).toLocaleString()}`,c:bal.balance>0?"#D63B3B":"#0A7A4B"},
                                 ].map(s=>(
                                   <div key={s.l}>
-                                    <p style={{fontSize:11,color:T.subtext,marginBottom:3}}>{s.l}</p>
-                                    <p style={{fontSize:17,fontWeight:800,color:s.c}}>{s.v}</p>
+                                    <p style={{fontSize:10,color:T.subtext,marginBottom:2}}>{s.l}</p>
+                                    <p style={{fontSize:15,fontWeight:800,color:s.c}}>{s.v}</p>
                                   </div>
                                 ))}
                               </div>
-                              <div style={{height:8,background:T.cardBorder,borderRadius:999,overflow:"hidden"}}>
+                              <div style={{height:7,background:T.cardBorder,borderRadius:999,overflow:"hidden"}}>
                                 <div style={{height:"100%",width:`${pct}%`,borderRadius:999,transition:"width 1s ease",background:pct===100?"linear-gradient(90deg,#0A7A4B,#1DB87A)":pct>=50?"linear-gradient(90deg,#B8800A,#F0C030)":"linear-gradient(90deg,#8B1A1A,#E24B4A)"}}/>
                               </div>
-                              <p style={{fontSize:11,color:T.subtext,marginTop:5,textAlign:"right"}}>{pct}% paid this month</p>
+                              <p style={{fontSize:10,color:T.subtext,marginTop:4,textAlign:"right"}}>{pct}% paid</p>
                             </div>
 
-                            {/* Cash payment */}
-                            <div style={{display:"flex",gap:10,marginBottom:10,flexWrap:"wrap"}}>
-                              <input className="inp" type="number" placeholder="Cash payment amount (KES)" style={{flex:1,minWidth:180}}
+                            <div style={{display:"flex",gap:8,marginBottom:8,flexWrap:"wrap"}}>
+                              <input className="inp" type="number" placeholder="Cash payment (KES)" style={{flex:1,minWidth:140}}
                                 value={amounts[t._id]||''} onChange={e=>setAmounts(p=>({...p,[t._id]:e.target.value}))}/>
-                              <button className="btn-blue" onClick={()=>makePayment(t._id)}>💵 Record Cash</button>
+                              <button className="btn-blue" onClick={()=>makePayment(t._id)}>💵 Cash</button>
                             </div>
 
-                            {/* M-Pesa */}
                             <MpesaPayButton tenantId={t._id} token={getToken()} rentAmount={bal.rent}/>
 
-                            {/* SMS */}
-                            <div style={{display:"flex",gap:10,marginTop:10,flexWrap:"wrap"}}>
-                              <input className="inp" placeholder="Custom SMS (leave blank for default)"
+                            <div style={{display:"flex",gap:8,marginTop:8,flexWrap:"wrap"}}>
+                              <input className="inp" placeholder="Custom SMS (optional)" style={{flex:1,minWidth:140}}
                                 value={customMsg[t._id]||''} onChange={e=>setCustomMsg(p=>({...p,[t._id]:e.target.value}))}/>
                               <button className="btn-sms" onClick={()=>sendSMS(t._id,t.phone)} disabled={smsSending[t._id]}>
-                                {smsSending[t._id]?"Sending...":"📱 SMS"}
+                                {smsSending[t._id]?"...":"📱"}
                               </button>
                             </div>
                           </div>
@@ -1073,72 +1036,62 @@ export default function App() {
                 </div>
               )}
 
-              {/* ════ TENANT PROFILE ════ */}
+              {/* TENANT PROFILE */}
               {page==="profile"&&profileTenant&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
-                  {/* ← Back arrow button */}
-                  <button className="btn-back" onClick={goBack} style={{marginBottom:22}}>
+                  <button className="btn-back" onClick={goBack} style={{marginBottom:18}}>
                     ← Back to {prevPage.charAt(0).toUpperCase()+prevPage.slice(1)}
                   </button>
 
-                  <div style={{display:"grid",gridTemplateColumns:"minmax(260px,1fr) 2fr",gap:20,alignItems:"start",flexWrap:"wrap"}}>
-
-                    {/* Profile card */}
-                    <div style={C({textAlign:"center",position:"sticky",top:0})}>
-                      <div style={{width:88,height:88,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:24,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:36,color:"white",margin:"0 auto 18px",boxShadow:"0 8px 28px rgba(10,122,75,0.38)"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16}}>
+                    <div style={C({textAlign:"center"})}>
+                      <div style={{width:80,height:80,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:22,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:32,color:"white",margin:"0 auto 14px",boxShadow:"0 8px 28px rgba(10,122,75,0.38)"}}>
                         {profileTenant.name?.[0]?.toUpperCase()}
                       </div>
-                      <h2 style={{fontSize:22,fontWeight:800,color:T.text,marginBottom:8}}>{profileTenant.name}</h2>
-                      <p style={{fontSize:14,color:T.subtext,marginBottom:4}}>📞 {profileTenant.phone}</p>
-                      {profileTenant.idNumber&&<p style={{fontSize:14,color:T.subtext,marginBottom:16}}>🪪 ID: {profileTenant.idNumber}</p>}
-                      <div style={{marginBottom:18}}>
+                      <h2 style={{fontSize:20,fontWeight:800,color:T.text,marginBottom:6}}>{profileTenant.name}</h2>
+                      <p style={{fontSize:13,color:T.subtext,marginBottom:4}}>📞 {profileTenant.phone}</p>
+                      {profileTenant.idNumber&&<p style={{fontSize:13,color:T.subtext,marginBottom:14}}>🪪 ID: {profileTenant.idNumber}</p>}
+                      <div style={{marginBottom:16}}>
                         <Tag bg={T.accentLight} color={T.accent}>
                           {houses.find(h=>String(h._id)===String(profileTenant.house))?`🏠 House ${houses.find(h=>String(h._id)===String(profileTenant.house))?.houseNumber}`:"No House Assigned"}
                         </Tag>
                       </div>
-                      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                      <div style={{display:"flex",flexDirection:"column",gap:8}}>
                         <button className="btn-edit" onClick={()=>setEditTenant({...profileTenant})}>✏️ Edit Details</button>
-                        <button className="btn-sms" onClick={()=>sendSMS(profileTenant._id,profileTenant.phone)}>📱 Send SMS Reminder</button>
-                        <button className="btn-danger" onClick={()=>setConfirmDelete({type:"tenant",id:profileTenant._id,name:profileTenant.name})}>🗑️ Delete Tenant</button>
+                        <button className="btn-sms" onClick={()=>sendSMS(profileTenant._id,profileTenant.phone)}>📱 Send SMS</button>
+                        <button className="btn-danger" onClick={()=>setConfirmDelete({type:"tenant",id:profileTenant._id,name:profileTenant.name})}>🗑️ Delete</button>
                       </div>
                     </div>
 
-                    {/* Payment history */}
                     <div style={C()}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18,flexWrap:"wrap",gap:10}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
                         <h2 style={{...CT,margin:0}}>Payment History</h2>
-                        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                           <Tag bg={T.accentLight} color={T.accent}>{profilePayments.length} records</Tag>
-                          <Tag bg="#E1F5EE" color="#0F6E56">
-                            KES {profilePayments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()} total
-                          </Tag>
+                          <Tag bg="#E1F5EE" color="#0F6E56">KES {profilePayments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()}</Tag>
                         </div>
                       </div>
-
                       {!profilePayments.length
                         ?<Empty T={T} icon="💳" text="No payments recorded yet"/>
                         :<div style={{overflowX:"auto"}}>
-                          <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
-                            <thead><tr>{["Amount","Reference","Status","Method","Date"].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
+                          <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                            <thead><tr>{["Amount","Reference","Status","Date"].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                             <tbody>
                               {profilePayments.map((p,i)=>(
                                 <tr key={p._id} style={{background:i%2===0?T.rowAlt:T.card}}>
-                                  <td style={TD}><span style={{color:"#0A7A4B",fontWeight:800,fontSize:15}}>KES {(p.amount||0).toLocaleString()}</span></td>
-                                  <td style={TD}><code style={{fontSize:11,background:T.statRow,padding:"3px 9px",borderRadius:6,color:T.text}}>{p.reference||"—"}</code></td>
+                                  <td style={TD}><span style={{color:"#0A7A4B",fontWeight:800}}>KES {(p.amount||0).toLocaleString()}</span></td>
+                                  <td style={TD}><code style={{fontSize:10,background:T.statRow,padding:"2px 7px",borderRadius:5,color:T.text}}>{p.reference||"—"}</code></td>
                                   <td style={TD}><Tag bg={p.status==="confirmed"?"#E1F5EE":p.status==="pending"?"#FAEEDA":"#FCEBEB"} color={p.status==="confirmed"?"#0F6E56":p.status==="pending"?"#854F0B":"#A32D2D"}>{p.status||"confirmed"}</Tag></td>
-                                  <td style={TD}><span style={{fontSize:12,color:T.subtext}}>{p.paymentMethod||"cash"}</span></td>
-                                  <td style={TD}><span style={{fontSize:12,color:T.subtext}}>{p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"}):"—"}</span></td>
+                                  <td style={TD}><span style={{fontSize:11,color:T.subtext}}>{p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"}):"—"}</span></td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
                       }
-
-                      {/* Total summary */}
-                      <div style={{marginTop:16,padding:"14px 18px",background:T.statRow,borderRadius:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                        <span style={{fontSize:14,color:T.subtext,fontWeight:600}}>Total Confirmed Payments</span>
-                        <span style={{fontSize:20,fontWeight:800,color:"#0A7A4B"}}>
+                      <div style={{marginTop:14,padding:"12px 16px",background:T.statRow,borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <span style={{fontSize:13,color:T.subtext,fontWeight:600}}>Total Confirmed</span>
+                        <span style={{fontSize:18,fontWeight:800,color:"#0A7A4B"}}>
                           KES {profilePayments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()}
                         </span>
                       </div>
@@ -1147,32 +1100,31 @@ export default function App() {
                 </div>
               )}
 
-              {/* ════ PAYMENTS ════ */}
+              {/* PAYMENTS */}
               {page==="payments"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   <div style={C()}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18,flexWrap:"wrap",gap:12}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
                       <h2 style={{...CT,margin:0}}>💳 Payment History</h2>
-                      <div style={{background:"linear-gradient(135deg,#0A3D2B,#0A7A4B)",color:"white",padding:"8px 18px",borderRadius:999,fontSize:13,fontWeight:700}}>
-                        {allPayments.length} records · KES {allPayments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()} confirmed
+                      <div style={{background:"linear-gradient(135deg,#0A3D2B,#0A7A4B)",color:"white",padding:"6px 14px",borderRadius:999,fontSize:12,fontWeight:700}}>
+                        {allPayments.length} records · KES {allPayments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()}
                       </div>
                     </div>
                     {!allPayments.length
                       ?<Empty T={T} icon="💳" text="No payments yet"/>
                       :<div style={{overflowX:"auto"}}>
-                        <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
-                          <thead><tr>{["#","Tenant","Amount","Reference","Status","Method","Date",""].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
+                        <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                          <thead><tr>{["#","Tenant","Amount","Reference","Status","Date",""].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                           <tbody>
                             {allPayments.map((p,i)=>(
                               <tr key={p._id} style={{background:i%2===0?T.rowAlt:T.card}}>
-                                <td style={TD}><span style={{color:T.subtext,fontSize:12}}>{i+1}</span></td>
+                                <td style={TD}><span style={{color:T.subtext,fontSize:11}}>{i+1}</span></td>
                                 <td style={TD}><Av name={p.tenant?.name||"?"}/><span style={{fontWeight:600,color:T.text}}>{p.tenant?.name||"Unknown"}</span></td>
                                 <td style={TD}><span style={{color:"#0A7A4B",fontWeight:800}}>KES {(p.amount||0).toLocaleString()}</span></td>
-                                <td style={TD}><code style={{fontSize:11,background:T.statRow,padding:"2px 8px",borderRadius:6,color:T.text}}>{p.reference||"—"}</code></td>
+                                <td style={TD}><code style={{fontSize:10,background:T.statRow,padding:"2px 7px",borderRadius:5,color:T.text}}>{p.reference||"—"}</code></td>
                                 <td style={TD}><Tag bg={p.status==="confirmed"?"#E1F5EE":p.status==="pending"?"#FAEEDA":"#FCEBEB"} color={p.status==="confirmed"?"#0F6E56":p.status==="pending"?"#854F0B":"#A32D2D"}>{p.status||"confirmed"}</Tag></td>
-                                <td style={TD}><span style={{fontSize:12,color:T.subtext}}>{p.paymentMethod||"cash"}</span></td>
-                                <td style={TD}><span style={{fontSize:12,color:T.subtext}}>{p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"}):"—"}</span></td>
-                                <td style={TD}><button className="btn-danger" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setConfirmDelete({type:"payment",id:p._id,name:`KES ${p.amount} payment`})}>🗑️</button></td>
+                                <td style={TD}><span style={{fontSize:11,color:T.subtext}}>{p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"}):"—"}</span></td>
+                                <td style={TD}><button className="btn-danger" style={{padding:"4px 8px",fontSize:10}} onClick={()=>setConfirmDelete({type:"payment",id:p._id,name:`KES ${p.amount} payment`})}>🗑️</button></td>
                               </tr>
                             ))}
                           </tbody>
@@ -1183,12 +1135,12 @@ export default function App() {
                 </div>
               )}
 
-              {/* ════ REPORTS ════ */}
+              {/* REPORTS */}
               {page==="reports"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   <div style={C()}>
                     <h2 style={CT}>📋 Monthly Rent Report</h2>
-                    <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"flex-end"}}>
+                    <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
                       <Field lbl="Month">
                         <select className="inp" style={{width:"auto"}} value={repMonth} onChange={e=>setRepMonth(Number(e.target.value))}>
                           {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
@@ -1200,91 +1152,90 @@ export default function App() {
                         </select>
                       </Field>
                       <button className="btn-primary" onClick={loadReport} disabled={repLoading}>{repLoading?"Loading...":"Generate Report"}</button>
-                      {report&&<button className="btn-gold" onClick={()=>window.print()}>🖨️ Print Report</button>}
+                      {report&&<button className="btn-gold" onClick={()=>window.print()}>🖨️ Print</button>}
                     </div>
                   </div>
-
                   {report?(
                     <>
-                      <div style={{textAlign:"center",marginBottom:20,padding:"22px",background:`linear-gradient(135deg,${T.sidebar},#0A3D2B)`,borderRadius:16,color:"white"}}>
-                        <h2 className="ghv-title" style={{fontSize:22,marginBottom:6}}>GIFTED HANDS VENTURES</h2>
-                        <p style={{color:"rgba(255,255,255,0.65)",fontSize:13}}>Rent Collection Report — {MONTHS[report.month-1]} {report.year}</p>
+                      <div style={{textAlign:"center",marginBottom:16,padding:"20px",background:`linear-gradient(135deg,${T.sidebar},#0A3D2B)`,borderRadius:14,color:"white"}}>
+                        <h2 className="ghv-title" style={{fontSize:20,marginBottom:4}}>GIFTED HANDS VENTURES</h2>
+                        <p style={{color:"rgba(255,255,255,0.65)",fontSize:12}}>Rent Report — {MONTHS[report.month-1]} {report.year}</p>
                       </div>
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:14}}>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
                         {[
                           {l:"Period",      v:`${MONTHS[report.month-1]} ${report.year}`, bg:"linear-gradient(135deg,#1459A0,#2D7DD2)",icon:"📅"},
                           {l:"Total Income",v:`KES ${(report.totalIncome||0).toLocaleString()}`, bg:"linear-gradient(135deg,#1A4A1A,#2E8B2E)",icon:"💰"},
                           {l:"Transactions",v:report.transactions, bg:"linear-gradient(135deg,#1A1A6B,#534AB7)",icon:"🔢"},
                           {l:"Avg Payment", v:report.transactions>0?`KES ${Math.round((report.totalIncome||0)/report.transactions).toLocaleString()}`:"KES 0", bg:"linear-gradient(135deg,#0A3D2B,#0A7A4B)",icon:"📊"},
                         ].map(c=>(
-                          <div key={c.l} className="card-h" style={{background:c.bg,borderRadius:16,padding:"22px 20px",boxShadow:"0 4px 20px rgba(0,0,0,0.18)"}}>
-                            <span style={{fontSize:28}}>{c.icon}</span>
-                            <p style={{fontSize:24,fontWeight:800,color:"white",margin:"8px 0 4px"}}>{c.v}</p>
-                            <p style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.7)"}}>{c.l}</p>
+                          <div key={c.l} style={{background:c.bg,borderRadius:14,padding:"18px 16px",boxShadow:"0 4px 20px rgba(0,0,0,0.18)"}}>
+                            <span style={{fontSize:24}}>{c.icon}</span>
+                            <p style={{fontSize:20,fontWeight:800,color:"white",margin:"6px 0 3px"}}>{c.v}</p>
+                            <p style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.7)"}}>{c.l}</p>
                           </div>
                         ))}
                       </div>
                     </>
                   ):!repLoading&&(
-                    <div style={{textAlign:"center",padding:"60px 0",color:T.subtext}}>
-                      <p style={{fontSize:42,marginBottom:12}}>📋</p>
-                      <p style={{fontWeight:600,fontSize:16}}>Select a month and year, then click Generate Report</p>
+                    <div style={{textAlign:"center",padding:"48px 0",color:T.subtext}}>
+                      <p style={{fontSize:38,marginBottom:10}}>📋</p>
+                      <p style={{fontWeight:600}}>Select a month and year, then click Generate Report</p>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* ════ SMS & ALERTS ════ */}
+              {/* SMS */}
               {page==="sms"&&(
                 <div style={{animation:"fadeUp 0.35s ease"}}>
                   <div style={C()}>
                     <h2 style={CT}>📢 Broadcast to All Tenants</h2>
-                    <p style={{fontSize:13,color:T.subtext,marginBottom:14}}>Send one SMS to all {tenants.length} tenants at once</p>
-                    <textarea className="inp" rows={4} placeholder="Dear tenant, your rent is due. Please pay promptly to avoid penalties. Thank you. — Gifted Hands Ventures"
+                    <p style={{fontSize:13,color:T.subtext,marginBottom:12}}>Send one SMS to all {tenants.length} tenants at once</p>
+                    <textarea className="inp" rows={4} placeholder="Dear tenant, your rent is due. Please pay promptly. Thank you. — Gifted Hands Ventures"
                       value={broadcastMsg} onChange={e=>setBroadcastMsg(e.target.value)}/>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12,flexWrap:"wrap",gap:10}}>
-                      <span style={{fontSize:12,color:T.subtext}}>{broadcastMsg.length} characters · {tenants.length} recipients</span>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10,flexWrap:"wrap",gap:8}}>
+                      <span style={{fontSize:11,color:T.subtext}}>{broadcastMsg.length} chars · {tenants.length} recipients</span>
                       <button className="btn-primary" onClick={sendBroadcast} disabled={broadcastSending}>
-                        {broadcastSending?"Sending...":"📱 Send to All Tenants"}
+                        {broadcastSending?"Sending...":"📱 Send to All"}
                       </button>
                     </div>
                   </div>
 
                   {reminders.length>0&&(
                     <div style={C()}>
-                      <h2 style={{...CT,display:"flex",alignItems:"center",gap:10}}>
+                      <h2 style={{...CT,display:"flex",alignItems:"center",gap:8}}>
                         ⚠️ Due Soon <Tag bg="#FAEEDA" color="#854F0B">{reminders.length}</Tag>
                       </h2>
                       {reminders.map((r,i)=>(
-                        <div key={i} style={{background:"#FAEEDA",borderRadius:12,padding:"13px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:10}}>
+                        <div key={i} style={{background:"#FAEEDA",borderRadius:10,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8,marginBottom:8}}>
                           <div>
-                            <p style={{fontWeight:700,color:"#854F0B",fontSize:14}}>{r.name}</p>
-                            <p style={{fontSize:12,color:"#a06020",marginTop:2}}>{r.message}</p>
+                            <p style={{fontWeight:700,color:"#854F0B",fontSize:13}}>{r.name}</p>
+                            <p style={{fontSize:11,color:"#a06020",marginTop:2}}>{r.message}</p>
                           </div>
-                          <button className="btn-sms" onClick={()=>{const t=tenants.find(t=>t.name===r.name);if(t)sendSMS(t._id,t.phone);}}>📱 Send Reminder</button>
+                          <button className="btn-sms" onClick={()=>{const t=tenants.find(t=>t.name===r.name);if(t)sendSMS(t._id,t.phone);}}>📱 Send</button>
                         </div>
                       ))}
                     </div>
                   )}
 
                   <div style={C()}>
-                    <h2 style={{...CT,marginBottom:14}}>📨 Individual SMS</h2>
-                    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                    <h2 style={{...CT,marginBottom:12}}>📨 Individual SMS</h2>
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
                       {tenants.map(t=>(
-                        <div key={t._id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:T.statRow,borderRadius:12,flexWrap:"wrap"}}>
+                        <div key={t._id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:T.statRow,borderRadius:10,flexWrap:"wrap"}}>
                           <Av name={t.name}/>
-                          <div style={{flex:1,minWidth:100}}>
-                            <p style={{fontWeight:700,fontSize:14,color:T.text}}>{t.name}</p>
-                            <p style={{fontSize:12,color:T.subtext}}>{t.phone}</p>
+                          <div style={{flex:1,minWidth:80}}>
+                            <p style={{fontWeight:700,fontSize:13,color:T.text}}>{t.name}</p>
+                            <p style={{fontSize:11,color:T.subtext}}>{t.phone}</p>
                           </div>
-                          <input className="inp" placeholder="Custom message (optional)" style={{flex:2,minWidth:180}}
+                          <input className="inp" placeholder="Custom message (optional)" style={{flex:2,minWidth:150}}
                             value={customMsg[t._id]||''} onChange={e=>setCustomMsg(p=>({...p,[t._id]:e.target.value}))}/>
                           <button className="btn-sms" onClick={()=>sendSMS(t._id,t.phone)} disabled={smsSending[t._id]}>
-                            {smsSending[t._id]?"...":"📱 Send"}
+                            {smsSending[t._id]?"...":"📱"}
                           </button>
                         </div>
                       ))}
-                      {!tenants.length&&<Empty T={T} icon="👤" text="No tenants yet" sub="Add tenants first"/>}
+                      {!tenants.length&&<Empty T={T} icon="👤" text="No tenants yet"/>}
                     </div>
                   </div>
                 </div>
