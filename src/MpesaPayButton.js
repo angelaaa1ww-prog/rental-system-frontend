@@ -7,13 +7,13 @@
 
 import { useState } from "react";
 
-const API = "http://https://rental-system-backend-1t05.onrender.com:5000";
+const API = "https://rental-system-backend-1t05.onrender.com";
 
 export default function MpesaPayButton({ tenantId, token, rentAmount }) {
   const [amount, setAmount]       = useState("");
   const [loading, setLoading]     = useState(false);
   const [status, setStatus]       = useState(null);
-  const [_checkoutId, setCheckoutId] = useState(null);
+  const [checkoutId, setCheckoutId]   = useState(null);
   const [polling, setPolling]     = useState(false);
   const [result, setResult]       = useState(null);
 
@@ -53,9 +53,10 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
       }
 
       setStatus("sent");
-      setCheckoutId(data.checkoutRequestId);
+      const id = data.checkoutRequestId;
+      setCheckoutId(id);
       setLoading(false);
-      pollStatus(data.checkoutRequestId);
+      pollStatus(id);
 
     } catch {
       setStatus("error");

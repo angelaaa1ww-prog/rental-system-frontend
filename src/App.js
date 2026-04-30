@@ -302,11 +302,10 @@ export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("ghv-theme")==="dark");
   const T = dark ? DARK : LIGHT;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     injectStyles(T);
     localStorage.setItem("ghv-theme", dark?"dark":"light");
-  }, [dark]);
+  }, [dark, T]);
 
   const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
