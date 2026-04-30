@@ -13,7 +13,6 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
   const [amount, setAmount]       = useState("");
   const [loading, setLoading]     = useState(false);
   const [status, setStatus]       = useState(null);
-  const [checkoutId, setCheckoutId]   = useState(null);
   const [polling, setPolling]     = useState(false);
   const [result, setResult]       = useState(null);
 
@@ -30,7 +29,6 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
     setLoading(true);
     setStatus(null);
     setResult(null);
-    setCheckoutId(null);
 
     try {
       const res = await fetch(`${API}/api/mpesa/pay`, {
@@ -54,7 +52,6 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
 
       setStatus("sent");
       const id = data.checkoutRequestId;
-      setCheckoutId(id);
       setLoading(false);
       pollStatus(id);
 
