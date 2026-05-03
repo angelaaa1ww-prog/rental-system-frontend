@@ -368,7 +368,7 @@ export default function App() {
   const authH    = () => { const t=getToken(); return t?{Authorization:`Bearer ${t}`}:{}; };
 
   useEffect(() => { if(getToken()) setLoggedIn(true); }, []);
-  useEffect(() => { const m={1:6000,2:15000,3:20000,4:25000}; setRent(m[bedrooms]||''); }, [bedrooms]);
+  // Rent is entered manually — no auto-fill
 
   // ✅ FIX 2: Handle window resize
   useEffect(() => {
