@@ -387,7 +387,7 @@ export default function App() {
       if(res.status===401){localStorage.clear();setLoggedIn(false);show("Session expired","error");return null;}
       if(!res.ok){show(data?.message||"Something went wrong","error");return null;}
       return data;
-    } catch { show("Cannot reach server. Is backend running?","error"); return null; }
+    } catch { show("Connection failed — server may be starting up. Please wait a moment and retry.","error"); return null; }
   };
 
   const loadBalances = async (list) => {
@@ -431,16 +431,26 @@ export default function App() {
   const handleLogin = async () => {
     if(!email||!password){show("Enter email and password","error");return;}
     setLoginLoading(true);
-    const res=await safeFetch(`${API}/api/auth/login`,{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password})
-    });
-    setLoginLoading(false);
-    if(res?.token){
-      localStorage.setItem("token",res.token);
-      setLoginSuccess(true);
-      setTimeout(()=>{setLoggedIn(true);setLoginSuccess(false);},1800);
-    } else show("Invalid email or password","error");
+    try {
+      const res = await fetch(`${API}/api/auth/login`,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email,password})
+      });
+      const data = await res.json().catch(()=>null);
+      setLoginLoading(false);
+      if(res.ok && data?.token){
+        localStorage.setItem("token",data.token);
+        setLoginSuccess(true);
+        setTimeout(()=>{setLoggedIn(true);setLoginSuccess(false);},1800);
+      } else if(res.status===401||res.status===400){
+        show("Invalid email or password","error");
+      } else {
+        show(data?.message||"Login failed. Please try again.","error");
+      }
+    } catch {
+      setLoginLoading(false);
+      show("⏳ Server is waking up (Render free tier). Please wait ~30 seconds and try again.","error");
+    }
   };
 
   const handleLogout = () => {
