@@ -10,7 +10,7 @@ export default function HousesPage({ houses, apartments, onRefresh, toast }) {
   const [bedrooms, setBedrooms]       = useState(1);
   const [delConfirm, setDelConfirm]   = useState(null);
 
-  const rentMap = { 1: 10000, 2: 15000, 3: 20000, 4: 25000 };
+  const rentMap = { 1: 6000, 2: 15000, 3: 20000, 4: 25000 };
   const handleBedrooms = (b) => { setBedrooms(b); setRent(rentMap[b] || ''); };
 
   const addHouse = async () => {
