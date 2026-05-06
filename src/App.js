@@ -332,7 +332,6 @@ export default function App() {
   /* ── tenant form ── */
   const [tName, setTName]   = useState('');
   const [tPhone, setTPhone] = useState('');
-  const [tId, setTId]       = useState('');
 
   /* ── search ── */
   const [tenantSearch, setTenantSearch] = useState('');
@@ -496,16 +495,16 @@ export default function App() {
     if (!tName || !tPhone) { show("Name and phone required","error"); return; }
     const res = await safeFetch(`${API}/api/tenants`, {
       method:"POST", headers:{"Content-Type":"application/json",...authH()},
-      body: JSON.stringify({name:tName, phone:tPhone, idNumber:tId})
+      body: JSON.stringify({name:tName, phone:tPhone})
     });
-    if (res) { show("Tenant added!","success"); setTName(''); setTPhone(''); setTId(''); loadAll(); }
+    if (res) { show("Tenant added!","success"); setTName(''); setTPhone(''); loadAll(); }
   };
 
   /* ── edit tenant ── */
   const saveEditTenant = async () => {
     const res = await safeFetch(`${API}/api/tenants/${editTenant._id}`, {
       method:"PUT", headers:{"Content-Type":"application/json",...authH()},
-      body: JSON.stringify({name:editTenant.name, phone:editTenant.phone, idNumber:editTenant.idNumber})
+      body: JSON.stringify({name:editTenant.name, phone:editTenant.phone})
     });
     if (res) { show("Tenant updated!","success"); setEditTenant(null); loadAll(); }
   };
@@ -598,8 +597,7 @@ export default function App() {
   /* ── filtered data ── */
   const filteredTenants = tenants.filter(t =>
     t.name?.toLowerCase().includes(tenantSearch.toLowerCase()) ||
-    t.phone?.includes(tenantSearch) ||
-    t.idNumber?.includes(tenantSearch)
+    t.phone?.includes(tenantSearch)
   );
   const filteredHouses = houses.filter(h => {
     const ms = h.houseNumber?.toLowerCase().includes(houseSearch.toLowerCase()) || h.location?.toLowerCase().includes(houseSearch.toLowerCase());
@@ -690,7 +688,6 @@ export default function App() {
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <Field lbl="Full Name"><input className="inp" value={editTenant.name} onChange={e => setEditTenant(p => ({...p,name:e.target.value}))}/></Field>
             <Field lbl="Phone"><input className="inp" value={editTenant.phone} onChange={e => setEditTenant(p => ({...p,phone:e.target.value}))}/></Field>
-            <Field lbl="ID Number"><input className="inp" value={editTenant.idNumber||''} onChange={e => setEditTenant(p => ({...p,idNumber:e.target.value}))}/></Field>
             <div style={{display:"flex",gap:10,marginTop:8}}>
               <button className="btn-primary" onClick={saveEditTenant} style={{flex:1}}>💾 Save Changes</button>
               <button className="btn-outline" onClick={() => setEditTenant(null)} style={{flex:1}}>Cancel</button>
