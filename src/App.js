@@ -303,7 +303,7 @@ export default function App() {
   useEffect(() => {
     injectStyles(T);
     localStorage.setItem("ghv-theme", dark ? "dark" : "light");
-  }, [dark]);
+  }, [dark, T]);
 
   /* ── auth ── */
   const [email, setEmail]               = useState('');
