@@ -1010,7 +1010,6 @@ export default function App() {
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12}}>
                       <Field lbl="Full Name"><input className="inp" placeholder="e.g. John Kamau" value={tName} onChange={e => setTName(e.target.value)}/></Field>
                       <Field lbl="Phone Number"><input className="inp" placeholder="e.g. 0712345678" value={tPhone} onChange={e => setTPhone(e.target.value)}/></Field>
-                      <Field lbl="ID Number"><input className="inp" placeholder="National ID" value={tId} onChange={e => setTId(e.target.value)}/></Field>
                       <div style={{display:"flex",alignItems:"flex-end"}}>
                         <button className="btn-primary" onClick={addTenant} style={{width:"100%"}}>+ Add Tenant</button>
                       </div>
@@ -1044,7 +1043,7 @@ export default function App() {
                                   </div>
                                   <div>
                                     <p style={{fontWeight:700,fontSize:15,color:T.text}}>{t.name}</p>
-                                    <p style={{fontSize:12,color:T.subtext,marginTop:2}}>{t.phone}{t.idNumber?` · ID: ${t.idNumber}`:""}</p>
+                                    <p style={{fontSize:12,color:T.subtext,marginTop:2}}>{t.phone}</p>
                                   </div>
                                 </div>
                                 <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
@@ -1128,7 +1127,6 @@ export default function App() {
                       </div>
                       <h2 style={{fontSize:20,fontWeight:800,color:T.text,marginBottom:6}}>{profileTenant.name}</h2>
                       <p style={{fontSize:13,color:T.subtext,marginBottom:4}}>📞 {profileTenant.phone}</p>
-                      {profileTenant.idNumber && <p style={{fontSize:13,color:T.subtext,marginBottom:14}}>🪪 ID: {profileTenant.idNumber}</p>}
                       <div style={{marginBottom:16}}>
                         <Tag bg={T.accentLight} color={T.accent}>
                           {houses.find(h => String(h._id)===String(profileTenant.house))
