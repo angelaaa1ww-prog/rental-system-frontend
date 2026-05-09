@@ -187,6 +187,10 @@ function SkCard() {
 /* ══════════════════════════════════════════
    MAIN APP
 ══════════════════════════════════════════ */
+/* ── token helpers ── */
+const tok  = () => { const t=localStorage.getItem('token'); return(!t||t==="undefined"||t==="null")?null:t; };
+const auth = () => { const t=tok(); return t?{Authorization:`Bearer ${t}`}:{}; };
+
 export default function App() {
   const {list: toasts, show} = useToast();
   const [dark, setDark] = useState(() => localStorage.getItem("ghv-dark") === "1");
@@ -198,7 +202,7 @@ export default function App() {
     if (!el) { el = document.createElement("style"); el.id = "ghv-css"; document.head.appendChild(el); }
     el.textContent = buildStyles(T);
     localStorage.setItem("ghv-dark", dark ? "1" : "0");
-  }, [dark]); // eslint-disable-line
+  }, [dark, T]);
 
   /* ── auth ── */
   const [email, setEmail]         = useState('');
@@ -264,9 +268,6 @@ export default function App() {
   const apts      = ["A","B","C","D","E"];
   const MONTHS    = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const tok  = () => { const t=localStorage.getItem('token'); return(!t||t==="undefined"||t==="null")?null:t; };
-  const auth = () => { const t=tok(); return t?{Authorization:`Bearer ${t}`}:{}; };
-
   useEffect(() => { if(tok()) setLoggedIn(true); }, []);
 
   useEffect(() => {
@@ -276,7 +277,7 @@ export default function App() {
   }, []);
 
   /* ── fetch ── */
-  const go = async (url, opts={}) => {
+  const go = useCallback(async (url, opts={}) => {
     try {
       const r = await fetch(url, opts);
       const d = await r.json().catch(()=>null);
@@ -287,18 +288,18 @@ export default function App() {
       show("Server starting up... wait 30s and retry","error");
       return null;
     }
-  };
+  }, [show]);
 
-  const loadBal = async (list) => {
+  const loadBal = useCallback(async (list) => {
     const out={};
     await Promise.all(list.map(async t=>{
       const r=await go(`${API}/api/payments/balance/${t._id}`,{headers:auth()});
       out[t._id]=r||{rent:0,paid:0,balance:0};
     }));
     setBalances(out);
-  };
+  }, [go]);
 
-  const loadAll = async () => {
+  const loadAll = useCallback(async () => {
     if(fetching.current) return;
     fetching.current=true; setLoading(true);
     const [h,t,dsh,p,rem]=await Promise.all([
@@ -316,9 +317,9 @@ export default function App() {
     setReminders(Array.isArray(rem)?rem:[]);
     await loadBal(tl);
     setLoading(false); fetching.current=false;
-  };
+  }, [go, loadBal]);
 
-  useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn]); // eslint-disable-line
+  useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn, loadAll]);
 
   const nav = (id) => { setPage(id); if(window.innerWidth<=768) setSidebar(false); };
 
@@ -454,8 +455,9 @@ export default function App() {
         <div style={{background:dark?"rgba(14,35,24,0.97)":"rgba(255,255,255,0.97)",borderRadius:22,padding:"36px 28px",width:"min(400px,100%)",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",position:"relative",zIndex:1,border:`1px solid ${T.cardBorder}`}}>
           <div style={{textAlign:"center",marginBottom:28}}>
             <div style={{width:64,height:64,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:30}}>🏢</div>
-            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px",lineHeight:1.3}}>GIFTED HANDS</h1>
-            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px"}}>VENTURES</h1>
+            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px",lineHeight:1.3}}>
+              GIFTED HANDS<br/>VENTURES
+            </h1>
             <div style={{width:50,height:3,background:`linear-gradient(90deg,${T.gold},transparent)`,margin:"10px auto 8px"}}/>
             <p style={{fontSize:12,color:T.subtext}}>Property Management System</p>
           </div>
