@@ -236,11 +236,15 @@ export default function App() {
   /* ── tenant form (name + phone only) ── */
   const [tName, setTName] = useState('');
   const [tPhone, setTPhone] = useState('');
+  const [tId, setTId] = useState('');
 
   /* ── search ── */
   const [tSearch, setTSearch]   = useState('');
+  const [tFilter, setTFilter]   = useState('all');
   const [hSearch, setHSearch]   = useState('');
   const [hFilter, setHFilter]   = useState('all');
+  const [pSearch, setPSearch]   = useState('');
+  const [pFilter, setPFilter]   = useState('all');
 
   /* ── modals ── */
   const [editT, setEditT]   = useState(null);
@@ -354,11 +358,11 @@ export default function App() {
   /* ── tenant actions ── */
   const addTenant = async () => {
     if(!tName||!tPhone){ show("Name and phone required","error"); return; }
-    const r=await go(`${API}/api/tenants`,{method:"POST",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:tName,phone:tPhone})});
-    if(r){ show("Tenant added!","success"); setTName(''); setTPhone(''); loadAll(); }
+    const r=await go(`${API}/api/tenants`,{method:"POST",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:tName,phone:tPhone,idNumber:tId})});
+    if(r){ show("Tenant added!","success"); setTName(''); setTPhone(''); setTId(''); loadAll(); }
   };
   const saveTenant = async () => {
-    const r=await go(`${API}/api/tenants/${editT._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:editT.name,phone:editT.phone})});
+    const r=await go(`${API}/api/tenants/${editT._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:editT.name,phone:editT.phone,idNumber:editT.idNumber})});
     if(r){ show("Tenant updated!","success"); setEditT(null); loadAll(); }
   };
 
@@ -368,6 +372,10 @@ export default function App() {
     if(houses.find(h=>h._id===hid)?.status==="occupied"){ show("House already occupied","error"); return; }
     const r=await go(`${API}/api/tenants/${tid}/assign`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseId:hid})});
     if(r){ show("House assigned!","success"); loadAll(); }
+  };
+  const vacate = async (tid) => {
+    const r=await go(`${API}/api/tenants/${tid}/vacate`,{method:"PUT",headers:auth()});
+    if(r){ show("Tenant vacated","success"); loadAll(); }
   };
 
   /* ── delete ── */
