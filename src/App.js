@@ -566,6 +566,7 @@ export default function App() {
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div><Lbl T={T}>Full Name</Lbl><input className="inp" value={editT.name} onChange={e=>setEditT(p=>({...p,name:e.target.value}))}/></div>
             <div><Lbl T={T}>Phone</Lbl><input className="inp" value={editT.phone} onChange={e=>setEditT(p=>({...p,phone:e.target.value}))}/></div>
+            <div><Lbl T={T}>ID Number</Lbl><input className="inp" value={editT.idNumber||""} onChange={e=>setEditT(p=>({...p,idNumber:e.target.value}))}/></div>
             <div style={{display:"flex",gap:10,marginTop:6}}>
               <button className="btn-green" onClick={saveTenant} style={{flex:1}}>💾 Save</button>
               <button className="btn-outline" onClick={()=>setEditT(null)} style={{flex:1}}>Cancel</button>
@@ -581,6 +582,12 @@ export default function App() {
             <div><Lbl T={T}>House Number</Lbl><input className="inp" value={editH.houseNumber} onChange={e=>setEditH(p=>({...p,houseNumber:e.target.value}))}/></div>
             <div><Lbl T={T}>Location</Lbl><input className="inp" value={editH.location} onChange={e=>setEditH(p=>({...p,location:e.target.value}))}/></div>
             <div><Lbl T={T}>Rent (KES)</Lbl><input className="inp" type="number" value={editH.rent} onChange={e=>setEditH(p=>({...p,rent:e.target.value}))}/></div>
+            <div>
+              <Lbl T={T}>Apartment</Lbl>
+              <select className="inp" value={editH.apartment} onChange={e=>setEditH(p=>({...p,apartment:e.target.value}))}>
+                {apts.map(a=><option key={a} value={a}>Apartment {a}</option>)}
+              </select>
+            </div>
             <div>
               <Lbl T={T}>Bedrooms</Lbl>
               <select className="inp" value={editH.bedrooms} onChange={e=>setEditH(p=>({...p,bedrooms:e.target.value}))}>
