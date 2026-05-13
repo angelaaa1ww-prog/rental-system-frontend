@@ -351,7 +351,7 @@ export default function App() {
     if(r){ show("House added!","success"); setHNum(''); setHLoc(''); setHRent(''); setHBed(1); setHApt('A'); loadAll(); }
   };
   const saveHouse = async () => {
-    const r=await go(`${API}/api/houses/${editH._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseNumber:editH.houseNumber,location:editH.location,rent:Number(editH.rent),bedrooms:Number(editH.bedrooms)})});
+    const r=await go(`${API}/api/houses/${editH._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseNumber:editH.houseNumber,location:editH.location,rent:Number(editH.rent),apartment:editH.apartment,bedrooms:Number(editH.bedrooms)})});
     if(r){ show("House updated!","success"); setEditH(null); loadAll(); }
   };
 
