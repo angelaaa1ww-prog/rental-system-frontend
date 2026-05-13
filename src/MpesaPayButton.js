@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 
-const API = "https://rental-system-backend-1t05.onrender.com";
+const API = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
 
 export default function MpesaPayButton({ tenantId, token, rentAmount }) {
   const [amount, setAmount]       = useState("");

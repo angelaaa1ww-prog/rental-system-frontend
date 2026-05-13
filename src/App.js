@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Line } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
-const API = "https://rental-system-backend-1t05.onrender.com";
+const API = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
 const ADMIN_NAME = "Isaac Wekesa";
 
 /* ══════ THEMES ══════ */
@@ -21,10 +25,10 @@ const DARK = {
 
 /* ══════ GLOBAL STYLES ══════ */
 const buildStyles = (T) => `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html,body{height:100%;}
-  body{font-family:'DM Sans',sans-serif;background:${T.bg};color:${T.text};}
+  html,body{height:100%;height:100dvh;overflow:hidden;}
+  body{font-family:'Outfit',sans-serif;background:${T.bg};color:${T.text};-webkit-font-smoothing:antialiased;}
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
@@ -38,10 +42,10 @@ const buildStyles = (T) => `
     background-clip:text;animation:glow 3s ease-in-out infinite;
   }
   .inp{
-    width:100%;padding:11px 14px;border:1.5px solid ${T.inputBorder};
-    border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;
+    width:100%;padding:12px 14px;border:1.5px solid ${T.inputBorder};
+    border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;
     outline:none;background:${T.input};color:${T.text};
-    transition:border 0.2s;
+    transition:all 0.2s ease;
   }
   .inp:focus{border-color:${T.accent};}
   .inp[readonly]{opacity:0.6;cursor:default;}
@@ -93,8 +97,9 @@ const buildStyles = (T) => `
 
   /* MOBILE SIDEBAR */
   @media(max-width:768px){
-    .sidebar{position:fixed!important;top:0;left:0;height:100vh!important;z-index:300;transform:translateX(-100%);transition:transform 0.28s ease!important;}
-    .sidebar.open{transform:translateX(0)!important;box-shadow:4px 0 20px rgba(0,0,0,0.4);}
+    .sidebar{position:fixed!important;top:0;left:0;height:100vh!important;height:100dvh!important;z-index:300;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)!important;}
+    .sidebar.open{transform:translateX(0)!important;box-shadow:8px 0 30px rgba(0,0,0,0.5);}
+    .topbar-title{max-width:35vw!important;}
   }
   @media(min-width:769px){
     .sidebar{position:relative!important;transform:none!important;}
@@ -290,13 +295,9 @@ export default function App() {
     }
   }, [show]);
 
-  const loadBal = useCallback(async (list) => {
-    const out={};
-    await Promise.all(list.map(async t=>{
-      const r=await go(`${API}/api/payments/balance/${t._id}`,{headers:auth()});
-      out[t._id]=r||{rent:0,paid:0,balance:0};
-    }));
-    setBalances(out);
+  const loadBal = useCallback(async () => {
+    const r = await go(`${API}/api/payments/balances`, { headers: auth() });
+    if (r) setBalances(r);
   }, [go]);
 
   const loadAll = useCallback(async () => {
@@ -315,7 +316,7 @@ export default function App() {
     setDash(dsh||null);
     setPayments(Array.isArray(p)?p:[]);
     setReminders(Array.isArray(rem)?rem:[]);
-    await loadBal(tl);
+    await loadBal();
     setLoading(false); fetching.current=false;
   }, [go, loadBal]);
 
@@ -639,9 +640,9 @@ export default function App() {
           {/* Topbar */}
           <div className="no-print" style={{background:T.topbar,borderBottom:`1px solid ${T.topbarBorder}`,padding:"11px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,zIndex:50}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <button onClick={()=>setSidebar(o=>!o)} style={{background:"none",border:"none",fontSize:21,cursor:"pointer",color:T.subtext,lineHeight:1}}>☰</button>
+              <button onClick={()=>setSidebar(o=>!o)} style={{background:T.accentLight,border:"none",width:40,height:40,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,cursor:"pointer",color:T.accent,lineHeight:1}}>☰</button>
               <div>
-                <h1 style={{fontSize:15,fontWeight:700,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"42vw"}}>
+                <h1 className="topbar-title" style={{fontSize:16,fontWeight:800,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"50vw",letterSpacing:"-0.2px"}}>
                   {page==="profile"&&profTenant?`👤 ${profTenant.name}`:cur?`${cur.icon} ${cur.label}`:""}
                 </h1>
                 <p style={{fontSize:10,color:T.subtext}}>
