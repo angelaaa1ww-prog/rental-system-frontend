@@ -655,6 +655,8 @@ export default function App() {
               {l:"Occupied", v:occ,             c:"#1DB87A"},
               {l:"Vacant",   v:vac,             c:T.gold},
               {l:"Tenants",  v:tenants.length,  c:"#5B8DEF"},
+              {l:"Paid",     v:`KES ${collectedThisMonth.toLocaleString()}`, c:"#1DB87A"},
+              {l:"Arrears",  v:`KES ${arrearsTotal.toLocaleString()}`, c:"#E07070"},
               {l:"Overdue",  v:dash?.overdueCount??"—", c:"#E07070"},
             ].map(s=>(
               <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
@@ -1079,26 +1081,28 @@ export default function App() {
                         {payments.length} records · KES {payments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()}
                       </div>
                     </div>
-                    {!fPayments.length?<Empty T={T} icon="💳" text="No payments found"/>:(
-                    <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
-                      <input className="inp" style={{flex:1,minWidth:180}} placeholder="Search tenant, reference, or method..." value={pSearch} onChange={e=>setPSearch(e.target.value)}/>
-                      <select className="inp" style={{width:"auto"}} value={pFilter} onChange={e=>setPFilter(e.target.value)}>
-                        <option value="all">All statuses</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="pending">Pending</option>
-                        <option value="failed">Failed</option>
-                      </select>
-                      <button className="btn-outline" onClick={()=>exportCSV("payments",fPayments.map(p=>({
-                        tenant:p.tenant?.name||"Unknown",
-                        amount:p.amount,
-                        reference:p.reference||"",
-                        status:p.status||"confirmed",
-                        method:p.paymentMethod||"",
-                        month:p.month||"",
-                        date:p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE"):""
-                      })))}>Export CSV</button>
-                    </div>
-                      <div style={{overflowX:"auto"}}>
+                    {!payments.length?<Empty T={T} icon="💳" text="No payments yet"/>:(
+                      <>
+                        <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
+                          <input className="inp" style={{flex:1,minWidth:180}} placeholder="Search tenant, reference, or method..." value={pSearch} onChange={e=>setPSearch(e.target.value)}/>
+                          <select className="inp" style={{width:"auto"}} value={pFilter} onChange={e=>setPFilter(e.target.value)}>
+                            <option value="all">All statuses</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                          </select>
+                          <button className="btn-outline" onClick={()=>exportCSV("payments",fPayments.map(p=>({
+                            tenant:p.tenant?.name||"Unknown",
+                            amount:p.amount,
+                            reference:p.reference||"",
+                            status:p.status||"confirmed",
+                            method:p.paymentMethod||"",
+                            month:p.month||"",
+                            date:p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE"):""
+                          })))}>Export CSV</button>
+                        </div>
+                        {!fPayments.length?<Empty T={T} icon="💳" text="No payments match your filters"/>:(
+                        <div style={{overflowX:"auto"}}>
                         <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
                           <thead><tr>{["#","Tenant","Amount","Reference","Status","Date",""].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                           <tbody>
@@ -1116,6 +1120,8 @@ export default function App() {
                           </tbody>
                         </table>
                       </div>
+                      )}
+                      </>
                     )}
                   </div>
                 </div>
