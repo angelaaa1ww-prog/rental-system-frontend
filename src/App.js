@@ -452,11 +452,27 @@ export default function App() {
   };
 
   /* ── filters ── */
-  const fTenants = tenants.filter(t=>t.name?.toLowerCase().includes(tSearch.toLowerCase())||t.phone?.includes(tSearch));
+  const fTenants = tenants.filter(t=>{
+    const q=tSearch.toLowerCase();
+    const bal=balances[t._id]||{balance:0};
+    const assigned=!!t.house;
+    const matches=(t.name||"").toLowerCase().includes(q)||(t.phone||"").includes(tSearch)||(t.idNumber||"").toLowerCase().includes(q);
+    const status=tFilter==="all"||(tFilter==="assigned"&&assigned)||(tFilter==="unassigned"&&!assigned)||(tFilter==="arrears"&&bal.balance>0)||(tFilter==="paid"&&assigned&&bal.balance===0);
+    return matches&&status;
+  });
   const fHouses  = houses.filter(h=>{
     const ms=h.houseNumber?.toLowerCase().includes(hSearch.toLowerCase())||h.location?.toLowerCase().includes(hSearch.toLowerCase());
     const mf=hFilter==="all"||h.status===hFilter;
     return ms&&mf;
+  });
+  const fPayments = payments.filter(p=>{
+    const q=pSearch.toLowerCase();
+    const tenantName=(p.tenant?.name||"").toLowerCase();
+    const reference=(p.reference||"").toLowerCase();
+    const method=(p.paymentMethod||"").toLowerCase();
+    const matches=tenantName.includes(q)||reference.includes(q)||method.includes(q);
+    const status=pFilter==="all"||(p.status||"confirmed")===pFilter;
+    return matches&&status;
   });
 
   /* ── style shortcuts ── */
@@ -467,6 +483,8 @@ export default function App() {
 
   const occ = houses.filter(h=>h.status==="occupied").length;
   const vac = houses.filter(h=>h.status==="vacant").length;
+  const arrearsTotal = tenants.reduce((sum,t)=>sum+(balances[t._id]?.balance||0),0);
+  const collectedThisMonth = tenants.reduce((sum,t)=>sum+(balances[t._id]?.paid||0),0);
 
   /* ════════════════════════════════════
      LOGIN
