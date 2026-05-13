@@ -827,6 +827,15 @@ export default function App() {
                         </button>
                       ))}
                     </div>
+                    <button className="btn-outline" onClick={()=>exportCSV("houses",fHouses.map(h=>({
+                      apartment:h.apartment,
+                      houseNumber:h.houseNumber,
+                      location:h.location,
+                      bedrooms:h.bedrooms,
+                      rent:h.rent,
+                      status:h.status,
+                      tenant:h.tenant?.name||""
+                    })))}>Export CSV</button>
                   </div>
 
                   {apts.map(ap=>{
@@ -874,6 +883,7 @@ export default function App() {
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12}}>
                       <div><Lbl T={T}>Full Name</Lbl><input className="inp" placeholder="e.g. John Kamau" value={tName} onChange={e=>setTName(e.target.value)}/></div>
                       <div><Lbl T={T}>Phone Number</Lbl><input className="inp" placeholder="e.g. 0712345678" value={tPhone} onChange={e=>setTPhone(e.target.value)}/></div>
+                      <div><Lbl T={T}>ID Number</Lbl><input className="inp" placeholder="Optional" value={tId} onChange={e=>setTId(e.target.value)}/></div>
                       <div style={{display:"flex",alignItems:"flex-end"}}>
                         <button className="btn-green" onClick={addTenant} style={{width:"100%"}}>+ Add Tenant</button>
                       </div>
@@ -881,9 +891,34 @@ export default function App() {
                   </div>
 
                   {/* Search */}
-                  <div style={{position:"relative",marginBottom:12}}>
+                  <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
+                    <div style={{position:"relative",flex:1,minWidth:180}}>
                     <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:T.subtext,pointerEvents:"none"}}>🔍</span>
-                    <input className="inp" style={{paddingLeft:36}} placeholder="Search by name or phone..." value={tSearch} onChange={e=>setTSearch(e.target.value)}/>
+                    <input className="inp" style={{paddingLeft:36}} placeholder="Search by name, phone, or ID..." value={tSearch} onChange={e=>setTSearch(e.target.value)}/>
+                    </div>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                      {[
+                        ["all","All"],
+                        ["assigned","Assigned"],
+                        ["unassigned","Unassigned"],
+                        ["arrears","Arrears"],
+                        ["paid","Paid"]
+                      ].map(([id,label])=>(
+                        <button key={id} onClick={()=>setTFilter(id)} style={{padding:"9px 12px",borderRadius:9,border:`1.5px solid ${tFilter===id?T.accent:T.cardBorder}`,background:tFilter===id?T.accent:"transparent",color:tFilter===id?"white":T.subtext,fontWeight:600,fontSize:12,cursor:"pointer",transition:"all 0.2s"}}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <button className="btn-outline" onClick={()=>exportCSV("tenants",fTenants.map(t=>({
+                      name:t.name,
+                      phone:t.phone,
+                      idNumber:t.idNumber||"",
+                      house:t.house?.houseNumber||"",
+                      dueDate:t.dueDate?new Date(t.dueDate).toLocaleDateString("en-KE"):"",
+                      rent:balances[t._id]?.rent||0,
+                      paid:balances[t._id]?.paid||0,
+                      balance:balances[t._id]?.balance||0
+                    })))}>Export CSV</button>
                   </div>
                   <p style={{fontSize:12,color:T.subtext,fontWeight:600,marginBottom:12}}>{fTenants.length} tenant{fTenants.length!==1?"s":""}</p>
 
@@ -901,9 +936,16 @@ export default function App() {
                                 <div>
                                   <p style={{fontWeight:700,fontSize:15,color:T.text}}>{t.name}</p>
                                   <p style={{fontSize:12,color:T.subtext}}>{t.phone}</p>
+                                  {t.idNumber&&<p style={{fontSize:11,color:T.subtext}}>ID: {t.idNumber}</p>}
+                                  {t.dueDate&&(
+                                    <p style={{fontSize:11,color:daysUntil(t.dueDate)<0?"#D63B3B":T.subtext}}>
+                                      Due {new Date(t.dueDate).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                               <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                                {t.house&&<button className="btn-outline" style={{padding:"6px 10px",fontSize:11}} onClick={()=>vacate(t._id)}>Vacate</button>}
                                 <button className="btn-outline" style={{padding:"6px 10px",fontSize:11}} onClick={()=>openProfile(t)}>👁️ Profile</button>
                                 <button className="btn-ghost" onClick={()=>setEditT({...t})}>✏️</button>
                                 <button className="btn-red" onClick={()=>setDelConf({type:"tenant",id:t._id,name:t.name})}>🗑️</button>
@@ -1037,12 +1079,30 @@ export default function App() {
                         {payments.length} records · KES {payments.filter(p=>p.status==="confirmed").reduce((s,p)=>s+(p.amount||0),0).toLocaleString()}
                       </div>
                     </div>
-                    {!payments.length?<Empty T={T} icon="💳" text="No payments yet"/>:(
+                    {!fPayments.length?<Empty T={T} icon="💳" text="No payments found"/>:(
+                    <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
+                      <input className="inp" style={{flex:1,minWidth:180}} placeholder="Search tenant, reference, or method..." value={pSearch} onChange={e=>setPSearch(e.target.value)}/>
+                      <select className="inp" style={{width:"auto"}} value={pFilter} onChange={e=>setPFilter(e.target.value)}>
+                        <option value="all">All statuses</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                      </select>
+                      <button className="btn-outline" onClick={()=>exportCSV("payments",fPayments.map(p=>({
+                        tenant:p.tenant?.name||"Unknown",
+                        amount:p.amount,
+                        reference:p.reference||"",
+                        status:p.status||"confirmed",
+                        method:p.paymentMethod||"",
+                        month:p.month||"",
+                        date:p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE"):""
+                      })))}>Export CSV</button>
+                    </div>
                       <div style={{overflowX:"auto"}}>
                         <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
                           <thead><tr>{["#","Tenant","Amount","Reference","Status","Date",""].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                           <tbody>
-                            {payments.map((p,i)=>(
+                            {fPayments.map((p,i)=>(
                               <tr key={p._id} style={{background:i%2===0?T.rowAlt:T.card}}>
                                 <td style={TD}><span style={{color:T.subtext,fontSize:11}}>{i+1}</span></td>
                                 <td style={TD}><Av name={p.tenant?.name||"?"}/><span style={{fontWeight:600,color:T.text}}>{p.tenant?.name||"Unknown"}</span></td>
