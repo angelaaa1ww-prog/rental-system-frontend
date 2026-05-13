@@ -432,6 +432,25 @@ export default function App() {
     if(r) setReport(r);
   };
 
+  const daysUntil = (date) => {
+    if(!date) return null;
+    return Math.ceil((new Date(date).setHours(0,0,0,0)-new Date().setHours(0,0,0,0))/(24*60*60*1000));
+  };
+  const csvCell = (value) => `"${String(value ?? "").replace(/"/g,'""')}"`;
+  const exportCSV = (name, rows) => {
+    if(!rows.length){ show("No rows to export","error"); return; }
+    const headers = Object.keys(rows[0]);
+    const csv = [headers.join(","), ...rows.map(row=>headers.map(h=>csvCell(row[h])).join(","))].join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    show("CSV exported","success");
+  };
+
   /* ── filters ── */
   const fTenants = tenants.filter(t=>t.name?.toLowerCase().includes(tSearch.toLowerCase())||t.phone?.includes(tSearch));
   const fHouses  = houses.filter(h=>{
