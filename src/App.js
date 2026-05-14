@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Line } from 'react-chartjs-2';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
-const API = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
+const API = "https://rental-system-backend-1t05.onrender.com";
 const ADMIN_NAME = "Isaac Wekesa";
 
 /* ══════ THEMES ══════ */
@@ -25,10 +21,10 @@ const DARK = {
 
 /* ══════ GLOBAL STYLES ══════ */
 const buildStyles = (T) => `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html,body{height:100%;height:100dvh;overflow:hidden;}
-  body{font-family:'Outfit',sans-serif;background:${T.bg};color:${T.text};-webkit-font-smoothing:antialiased;}
+  html{height:100%;height:-webkit-fill-available;}body{min-height:100%;min-height:-webkit-fill-available;}
+  body{font-family:'DM Sans',sans-serif;background:${T.bg};color:${T.text};}
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
@@ -42,10 +38,10 @@ const buildStyles = (T) => `
     background-clip:text;animation:glow 3s ease-in-out infinite;
   }
   .inp{
-    width:100%;padding:12px 14px;border:1.5px solid ${T.inputBorder};
-    border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;
+    width:100%;padding:11px 14px;border:1.5px solid ${T.inputBorder};
+    border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;
     outline:none;background:${T.input};color:${T.text};
-    transition:all 0.2s ease;
+    transition:border 0.2s;
   }
   .inp:focus{border-color:${T.accent};}
   .inp[readonly]{opacity:0.6;cursor:default;}
@@ -97,9 +93,8 @@ const buildStyles = (T) => `
 
   /* MOBILE SIDEBAR */
   @media(max-width:768px){
-    .sidebar{position:fixed!important;top:0;left:0;height:100vh!important;height:100dvh!important;z-index:300;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)!important;}
-    .sidebar.open{transform:translateX(0)!important;box-shadow:8px 0 30px rgba(0,0,0,0.5);}
-    .topbar-title{max-width:35vw!important;}
+    .sidebar{position:fixed!important;top:0;left:0;height:100vh!important;z-index:300;transform:translateX(-100%);transition:transform 0.28s ease!important;}
+    .sidebar.open{transform:translateX(0)!important;box-shadow:4px 0 20px rgba(0,0,0,0.4);}
   }
   @media(min-width:769px){
     .sidebar{position:relative!important;transform:none!important;}
@@ -192,10 +187,6 @@ function SkCard() {
 /* ══════════════════════════════════════════
    MAIN APP
 ══════════════════════════════════════════ */
-/* ── token helpers ── */
-const tok  = () => { const t=localStorage.getItem('token'); return(!t||t==="undefined"||t==="null")?null:t; };
-const auth = () => { const t=tok(); return t?{Authorization:`Bearer ${t}`}:{}; };
-
 export default function App() {
   const {list: toasts, show} = useToast();
   const [dark, setDark] = useState(() => localStorage.getItem("ghv-dark") === "1");
@@ -207,7 +198,7 @@ export default function App() {
     if (!el) { el = document.createElement("style"); el.id = "ghv-css"; document.head.appendChild(el); }
     el.textContent = buildStyles(T);
     localStorage.setItem("ghv-dark", dark ? "1" : "0");
-  }, [dark, T]);
+  }, [dark]); // eslint-disable-line
 
   /* ── auth ── */
   const [email, setEmail]         = useState('');
@@ -236,15 +227,11 @@ export default function App() {
   /* ── tenant form (name + phone only) ── */
   const [tName, setTName] = useState('');
   const [tPhone, setTPhone] = useState('');
-  const [tId, setTId] = useState('');
 
   /* ── search ── */
   const [tSearch, setTSearch]   = useState('');
-  const [tFilter, setTFilter]   = useState('all');
   const [hSearch, setHSearch]   = useState('');
   const [hFilter, setHFilter]   = useState('all');
-  const [pSearch, setPSearch]   = useState('');
-  const [pFilter, setPFilter]   = useState('all');
 
   /* ── modals ── */
   const [editT, setEditT]   = useState(null);
@@ -277,6 +264,9 @@ export default function App() {
   const apts      = ["A","B","C","D","E"];
   const MONTHS    = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+  const tok  = () => { const t=localStorage.getItem('token'); return(!t||t==="undefined"||t==="null")?null:t; };
+  const auth = () => { const t=tok(); return t?{Authorization:`Bearer ${t}`}:{}; };
+
   useEffect(() => { if(tok()) setLoggedIn(true); }, []);
 
   useEffect(() => {
@@ -286,7 +276,7 @@ export default function App() {
   }, []);
 
   /* ── fetch ── */
-  const go = useCallback(async (url, opts={}) => {
+  const go = async (url, opts={}) => {
     try {
       const r = await fetch(url, opts);
       const d = await r.json().catch(()=>null);
@@ -297,14 +287,18 @@ export default function App() {
       show("Server starting up... wait 30s and retry","error");
       return null;
     }
-  }, [show]);
+  };
 
-  const loadBal = useCallback(async () => {
-    const r = await go(`${API}/api/payments/balances`, { headers: auth() });
-    if (r) setBalances(r);
-  }, [go]);
+  const loadBal = async (list) => {
+    const out={};
+    await Promise.all(list.map(async t=>{
+      const r=await go(`${API}/api/payments/balance/${t._id}`,{headers:auth()});
+      out[t._id]=r||{rent:0,paid:0,balance:0};
+    }));
+    setBalances(out);
+  };
 
-  const loadAll = useCallback(async () => {
+  const loadAll = async () => {
     if(fetching.current) return;
     fetching.current=true; setLoading(true);
     const [h,t,dsh,p,rem]=await Promise.all([
@@ -320,11 +314,11 @@ export default function App() {
     setDash(dsh||null);
     setPayments(Array.isArray(p)?p:[]);
     setReminders(Array.isArray(rem)?rem:[]);
-    await loadBal();
+    await loadBal(tl);
     setLoading(false); fetching.current=false;
-  }, [go, loadBal]);
+  };
 
-  useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn, loadAll]);
+  useEffect(()=>{ if(loggedIn) loadAll(); },[loggedIn]); // eslint-disable-line
 
   const nav = (id) => { setPage(id); if(window.innerWidth<=768) setSidebar(false); };
 
@@ -351,18 +345,18 @@ export default function App() {
     if(r){ show("House added!","success"); setHNum(''); setHLoc(''); setHRent(''); setHBed(1); setHApt('A'); loadAll(); }
   };
   const saveHouse = async () => {
-    const r=await go(`${API}/api/houses/${editH._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseNumber:editH.houseNumber,location:editH.location,rent:Number(editH.rent),apartment:editH.apartment,bedrooms:Number(editH.bedrooms)})});
+    const r=await go(`${API}/api/houses/${editH._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseNumber:editH.houseNumber,location:editH.location,rent:Number(editH.rent),bedrooms:Number(editH.bedrooms)})});
     if(r){ show("House updated!","success"); setEditH(null); loadAll(); }
   };
 
   /* ── tenant actions ── */
   const addTenant = async () => {
     if(!tName||!tPhone){ show("Name and phone required","error"); return; }
-    const r=await go(`${API}/api/tenants`,{method:"POST",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:tName,phone:tPhone,idNumber:tId})});
-    if(r){ show("Tenant added!","success"); setTName(''); setTPhone(''); setTId(''); loadAll(); }
+    const r=await go(`${API}/api/tenants`,{method:"POST",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:tName,phone:tPhone})});
+    if(r){ show("Tenant added!","success"); setTName(''); setTPhone(''); loadAll(); }
   };
   const saveTenant = async () => {
-    const r=await go(`${API}/api/tenants/${editT._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:editT.name,phone:editT.phone,idNumber:editT.idNumber})});
+    const r=await go(`${API}/api/tenants/${editT._id}`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({name:editT.name,phone:editT.phone})});
     if(r){ show("Tenant updated!","success"); setEditT(null); loadAll(); }
   };
 
@@ -372,10 +366,6 @@ export default function App() {
     if(houses.find(h=>h._id===hid)?.status==="occupied"){ show("House already occupied","error"); return; }
     const r=await go(`${API}/api/tenants/${tid}/assign`,{method:"PUT",headers:{"Content-Type":"application/json",...auth()},body:JSON.stringify({houseId:hid})});
     if(r){ show("House assigned!","success"); loadAll(); }
-  };
-  const vacate = async (tid) => {
-    const r=await go(`${API}/api/tenants/${tid}/vacate`,{method:"PUT",headers:auth()});
-    if(r){ show("Tenant vacated","success"); loadAll(); }
   };
 
   /* ── delete ── */
@@ -432,47 +422,12 @@ export default function App() {
     if(r) setReport(r);
   };
 
-  const daysUntil = (date) => {
-    if(!date) return null;
-    return Math.ceil((new Date(date).setHours(0,0,0,0)-new Date().setHours(0,0,0,0))/(24*60*60*1000));
-  };
-  const csvCell = (value) => `"${String(value ?? "").replace(/"/g,'""')}"`;
-  const exportCSV = (name, rows) => {
-    if(!rows.length){ show("No rows to export","error"); return; }
-    const headers = Object.keys(rows[0]);
-    const csv = [headers.join(","), ...rows.map(row=>headers.map(h=>csvCell(row[h])).join(","))].join("\n");
-    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name}-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    show("CSV exported","success");
-  };
-
   /* ── filters ── */
-  const fTenants = tenants.filter(t=>{
-    const q=tSearch.toLowerCase();
-    const bal=balances[t._id]||{balance:0};
-    const assigned=!!t.house;
-    const matches=(t.name||"").toLowerCase().includes(q)||(t.phone||"").includes(tSearch)||(t.idNumber||"").toLowerCase().includes(q);
-    const status=tFilter==="all"||(tFilter==="assigned"&&assigned)||(tFilter==="unassigned"&&!assigned)||(tFilter==="arrears"&&bal.balance>0)||(tFilter==="paid"&&assigned&&bal.balance===0);
-    return matches&&status;
-  });
+  const fTenants = tenants.filter(t=>t.name?.toLowerCase().includes(tSearch.toLowerCase())||t.phone?.includes(tSearch));
   const fHouses  = houses.filter(h=>{
     const ms=h.houseNumber?.toLowerCase().includes(hSearch.toLowerCase())||h.location?.toLowerCase().includes(hSearch.toLowerCase());
     const mf=hFilter==="all"||h.status===hFilter;
     return ms&&mf;
-  });
-  const fPayments = payments.filter(p=>{
-    const q=pSearch.toLowerCase();
-    const tenantName=(p.tenant?.name||"").toLowerCase();
-    const reference=(p.reference||"").toLowerCase();
-    const method=(p.paymentMethod||"").toLowerCase();
-    const matches=tenantName.includes(q)||reference.includes(q)||method.includes(q);
-    const status=pFilter==="all"||(p.status||"confirmed")===pFilter;
-    return matches&&status;
   });
 
   /* ── style shortcuts ── */
@@ -483,8 +438,6 @@ export default function App() {
 
   const occ = houses.filter(h=>h.status==="occupied").length;
   const vac = houses.filter(h=>h.status==="vacant").length;
-  const arrearsTotal = tenants.reduce((sum,t)=>sum+(balances[t._id]?.balance||0),0);
-  const collectedThisMonth = tenants.reduce((sum,t)=>sum+(balances[t._id]?.paid||0),0);
 
   /* ════════════════════════════════════
      LOGIN
@@ -501,9 +454,8 @@ export default function App() {
         <div style={{background:dark?"rgba(14,35,24,0.97)":"rgba(255,255,255,0.97)",borderRadius:22,padding:"36px 28px",width:"min(400px,100%)",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",position:"relative",zIndex:1,border:`1px solid ${T.cardBorder}`}}>
           <div style={{textAlign:"center",marginBottom:28}}>
             <div style={{width:64,height:64,background:"linear-gradient(135deg,#0A7A4B,#1DB87A)",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:30}}>🏢</div>
-            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px",lineHeight:1.3}}>
-              GIFTED HANDS<br/>VENTURES
-            </h1>
+            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px",lineHeight:1.3}}>GIFTED HANDS</h1>
+            <h1 className="ghv-title" style={{fontSize:24,letterSpacing:"0.5px"}}>VENTURES</h1>
             <div style={{width:50,height:3,background:`linear-gradient(90deg,${T.gold},transparent)`,margin:"10px auto 8px"}}/>
             <p style={{fontSize:12,color:T.subtext}}>Property Management System</p>
           </div>
@@ -566,7 +518,6 @@ export default function App() {
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div><Lbl T={T}>Full Name</Lbl><input className="inp" value={editT.name} onChange={e=>setEditT(p=>({...p,name:e.target.value}))}/></div>
             <div><Lbl T={T}>Phone</Lbl><input className="inp" value={editT.phone} onChange={e=>setEditT(p=>({...p,phone:e.target.value}))}/></div>
-            <div><Lbl T={T}>ID Number</Lbl><input className="inp" value={editT.idNumber||""} onChange={e=>setEditT(p=>({...p,idNumber:e.target.value}))}/></div>
             <div style={{display:"flex",gap:10,marginTop:6}}>
               <button className="btn-green" onClick={saveTenant} style={{flex:1}}>💾 Save</button>
               <button className="btn-outline" onClick={()=>setEditT(null)} style={{flex:1}}>Cancel</button>
@@ -582,12 +533,6 @@ export default function App() {
             <div><Lbl T={T}>House Number</Lbl><input className="inp" value={editH.houseNumber} onChange={e=>setEditH(p=>({...p,houseNumber:e.target.value}))}/></div>
             <div><Lbl T={T}>Location</Lbl><input className="inp" value={editH.location} onChange={e=>setEditH(p=>({...p,location:e.target.value}))}/></div>
             <div><Lbl T={T}>Rent (KES)</Lbl><input className="inp" type="number" value={editH.rent} onChange={e=>setEditH(p=>({...p,rent:e.target.value}))}/></div>
-            <div>
-              <Lbl T={T}>Apartment</Lbl>
-              <select className="inp" value={editH.apartment} onChange={e=>setEditH(p=>({...p,apartment:e.target.value}))}>
-                {apts.map(a=><option key={a} value={a}>Apartment {a}</option>)}
-              </select>
-            </div>
             <div>
               <Lbl T={T}>Bedrooms</Lbl>
               <select className="inp" value={editH.bedrooms} onChange={e=>setEditH(p=>({...p,bedrooms:e.target.value}))}>
@@ -615,7 +560,7 @@ export default function App() {
         </Modal>
       )}
 
-      <div style={{display:"flex",height:"100vh",overflow:"hidden",position:"relative"}}>
+      <div style={{display:"flex",height:"100dvh",minHeight:"-webkit-fill-available",overflow:"hidden",position:"relative"}}>
 
         {/* Mobile overlay */}
         {sidebar && window.innerWidth<=768 && (
@@ -655,8 +600,6 @@ export default function App() {
               {l:"Occupied", v:occ,             c:"#1DB87A"},
               {l:"Vacant",   v:vac,             c:T.gold},
               {l:"Tenants",  v:tenants.length,  c:"#5B8DEF"},
-              {l:"Paid",     v:`KES ${collectedThisMonth.toLocaleString()}`, c:"#1DB87A"},
-              {l:"Arrears",  v:`KES ${arrearsTotal.toLocaleString()}`, c:"#E07070"},
               {l:"Overdue",  v:dash?.overdueCount??"—", c:"#E07070"},
             ].map(s=>(
               <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
@@ -694,9 +637,9 @@ export default function App() {
           {/* Topbar */}
           <div className="no-print" style={{background:T.topbar,borderBottom:`1px solid ${T.topbarBorder}`,padding:"11px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,zIndex:50}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <button onClick={()=>setSidebar(o=>!o)} style={{background:T.accentLight,border:"none",width:40,height:40,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,cursor:"pointer",color:T.accent,lineHeight:1}}>☰</button>
+              <button onClick={()=>setSidebar(o=>!o)} style={{background:"none",border:"none",fontSize:21,cursor:"pointer",color:T.subtext,lineHeight:1}}>☰</button>
               <div>
-                <h1 className="topbar-title" style={{fontSize:16,fontWeight:800,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"50vw",letterSpacing:"-0.2px"}}>
+                <h1 style={{fontSize:15,fontWeight:700,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"42vw"}}>
                   {page==="profile"&&profTenant?`👤 ${profTenant.name}`:cur?`${cur.icon} ${cur.label}`:""}
                 </h1>
                 <p style={{fontSize:10,color:T.subtext}}>
@@ -829,15 +772,6 @@ export default function App() {
                         </button>
                       ))}
                     </div>
-                    <button className="btn-outline" onClick={()=>exportCSV("houses",fHouses.map(h=>({
-                      apartment:h.apartment,
-                      houseNumber:h.houseNumber,
-                      location:h.location,
-                      bedrooms:h.bedrooms,
-                      rent:h.rent,
-                      status:h.status,
-                      tenant:h.tenant?.name||""
-                    })))}>Export CSV</button>
                   </div>
 
                   {apts.map(ap=>{
@@ -885,7 +819,6 @@ export default function App() {
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12}}>
                       <div><Lbl T={T}>Full Name</Lbl><input className="inp" placeholder="e.g. John Kamau" value={tName} onChange={e=>setTName(e.target.value)}/></div>
                       <div><Lbl T={T}>Phone Number</Lbl><input className="inp" placeholder="e.g. 0712345678" value={tPhone} onChange={e=>setTPhone(e.target.value)}/></div>
-                      <div><Lbl T={T}>ID Number</Lbl><input className="inp" placeholder="Optional" value={tId} onChange={e=>setTId(e.target.value)}/></div>
                       <div style={{display:"flex",alignItems:"flex-end"}}>
                         <button className="btn-green" onClick={addTenant} style={{width:"100%"}}>+ Add Tenant</button>
                       </div>
@@ -893,34 +826,9 @@ export default function App() {
                   </div>
 
                   {/* Search */}
-                  <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
-                    <div style={{position:"relative",flex:1,minWidth:180}}>
+                  <div style={{position:"relative",marginBottom:12}}>
                     <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:T.subtext,pointerEvents:"none"}}>🔍</span>
-                    <input className="inp" style={{paddingLeft:36}} placeholder="Search by name, phone, or ID..." value={tSearch} onChange={e=>setTSearch(e.target.value)}/>
-                    </div>
-                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                      {[
-                        ["all","All"],
-                        ["assigned","Assigned"],
-                        ["unassigned","Unassigned"],
-                        ["arrears","Arrears"],
-                        ["paid","Paid"]
-                      ].map(([id,label])=>(
-                        <button key={id} onClick={()=>setTFilter(id)} style={{padding:"9px 12px",borderRadius:9,border:`1.5px solid ${tFilter===id?T.accent:T.cardBorder}`,background:tFilter===id?T.accent:"transparent",color:tFilter===id?"white":T.subtext,fontWeight:600,fontSize:12,cursor:"pointer",transition:"all 0.2s"}}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    <button className="btn-outline" onClick={()=>exportCSV("tenants",fTenants.map(t=>({
-                      name:t.name,
-                      phone:t.phone,
-                      idNumber:t.idNumber||"",
-                      house:t.house?.houseNumber||"",
-                      dueDate:t.dueDate?new Date(t.dueDate).toLocaleDateString("en-KE"):"",
-                      rent:balances[t._id]?.rent||0,
-                      paid:balances[t._id]?.paid||0,
-                      balance:balances[t._id]?.balance||0
-                    })))}>Export CSV</button>
+                    <input className="inp" style={{paddingLeft:36}} placeholder="Search by name or phone..." value={tSearch} onChange={e=>setTSearch(e.target.value)}/>
                   </div>
                   <p style={{fontSize:12,color:T.subtext,fontWeight:600,marginBottom:12}}>{fTenants.length} tenant{fTenants.length!==1?"s":""}</p>
 
@@ -938,16 +846,9 @@ export default function App() {
                                 <div>
                                   <p style={{fontWeight:700,fontSize:15,color:T.text}}>{t.name}</p>
                                   <p style={{fontSize:12,color:T.subtext}}>{t.phone}</p>
-                                  {t.idNumber&&<p style={{fontSize:11,color:T.subtext}}>ID: {t.idNumber}</p>}
-                                  {t.dueDate&&(
-                                    <p style={{fontSize:11,color:daysUntil(t.dueDate)<0?"#D63B3B":T.subtext}}>
-                                      Due {new Date(t.dueDate).toLocaleDateString("en-KE",{day:"numeric",month:"short",year:"numeric"})}
-                                    </p>
-                                  )}
                                 </div>
                               </div>
                               <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                                {t.house&&<button className="btn-outline" style={{padding:"6px 10px",fontSize:11}} onClick={()=>vacate(t._id)}>Vacate</button>}
                                 <button className="btn-outline" style={{padding:"6px 10px",fontSize:11}} onClick={()=>openProfile(t)}>👁️ Profile</button>
                                 <button className="btn-ghost" onClick={()=>setEditT({...t})}>✏️</button>
                                 <button className="btn-red" onClick={()=>setDelConf({type:"tenant",id:t._id,name:t.name})}>🗑️</button>
@@ -1082,31 +983,11 @@ export default function App() {
                       </div>
                     </div>
                     {!payments.length?<Empty T={T} icon="💳" text="No payments yet"/>:(
-                      <>
-                        <div style={{display:"flex",gap:10,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
-                          <input className="inp" style={{flex:1,minWidth:180}} placeholder="Search tenant, reference, or method..." value={pSearch} onChange={e=>setPSearch(e.target.value)}/>
-                          <select className="inp" style={{width:"auto"}} value={pFilter} onChange={e=>setPFilter(e.target.value)}>
-                            <option value="all">All statuses</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="pending">Pending</option>
-                            <option value="failed">Failed</option>
-                          </select>
-                          <button className="btn-outline" onClick={()=>exportCSV("payments",fPayments.map(p=>({
-                            tenant:p.tenant?.name||"Unknown",
-                            amount:p.amount,
-                            reference:p.reference||"",
-                            status:p.status||"confirmed",
-                            method:p.paymentMethod||"",
-                            month:p.month||"",
-                            date:p.createdAt?new Date(p.createdAt).toLocaleDateString("en-KE"):""
-                          })))}>Export CSV</button>
-                        </div>
-                        {!fPayments.length?<Empty T={T} icon="💳" text="No payments match your filters"/>:(
-                        <div style={{overflowX:"auto"}}>
+                      <div style={{overflowX:"auto"}}>
                         <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
                           <thead><tr>{["#","Tenant","Amount","Reference","Status","Date",""].map(h=><th key={h} style={TH}>{h}</th>)}</tr></thead>
                           <tbody>
-                            {fPayments.map((p,i)=>(
+                            {payments.map((p,i)=>(
                               <tr key={p._id} style={{background:i%2===0?T.rowAlt:T.card}}>
                                 <td style={TD}><span style={{color:T.subtext,fontSize:11}}>{i+1}</span></td>
                                 <td style={TD}><Av name={p.tenant?.name||"?"}/><span style={{fontWeight:600,color:T.text}}>{p.tenant?.name||"Unknown"}</span></td>
@@ -1120,8 +1001,6 @@ export default function App() {
                           </tbody>
                         </table>
                       </div>
-                      )}
-                      </>
                     )}
                   </div>
                 </div>
