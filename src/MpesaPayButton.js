@@ -51,9 +51,9 @@ export default function MpesaPayButton({ tenantId, token, rentAmount }) {
       }
 
       setStatus("sent");
-      const id = data.checkoutRequestId;
+      const id = data.checkoutRequestID || data.checkoutRequestId;
       setLoading(false);
-      pollStatus(id);
+      if (id) pollStatus(id);
 
     } catch {
       setStatus("error");
