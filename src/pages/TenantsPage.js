@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API, authHeader, safeFetch } from '../api';
 import { Avatar, Field, MiniStat, EmptyState, ConfirmModal, cardStyle, cardTitleStyle } from '../components/ui';
 
@@ -10,7 +10,8 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
   const [smsSending, setSmsSending] = useState({});
   const [delConfirm, setDelConfirm] = useState(null);
   const [vacateConfirm, setVacateConfirm] = useState(null);
-  const [stkSending, setStkSending] = useState({});
+  const [c2bConfig, setC2bConfig] = useState(null);
+  const [c2bLoading, setC2bLoading] = useState(true);
 
   const addTenant = async () => {
     if (!name || !phone) { toast('Name and phone required', 'error'); return; }
@@ -48,6 +49,30 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
     setDelConfirm(null);
   };
 
+  // Fetch C2B configuration for payment instructions
+  const fetchC2bConfig = async () => {
+    setC2bLoading(true);
+    try {
+      const res = await safeFetch(`${API}/api/c2b/config`);
+      if (res && !res.__error) {
+        setC2bConfig(res);
+      } else {
+        // Fallback to a default value if config fetch fails
+        setC2bConfig({ payBillNumber: "XXXXXX", accountReferenceFormat: "Tenant ID or House Number" });
+      }
+    } catch (error) {
+      console.error('Failed to fetch C2B config:', error);
+      setC2bConfig({ payBillNumber: "XXXXXX", accountReferenceFormat: "Tenant ID or House Number" });
+    } finally {
+      setC2bLoading(false);
+    }
+  };
+
+  // Fetch C2B config when component mounts
+  React.useEffect(() => {
+    fetchC2bConfig();
+  }, []);
+
   const makePayment = async (tenantId) => {
     const amount = Number(amounts[tenantId]);
     if (!amount || amount <= 0) { toast('Enter a valid amount', 'error'); return; }
@@ -72,23 +97,6 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
     else toast(res?.message || 'SMS failed', 'error');
   };
 
-  const sendMpesaPrompt = async (tenantId, phone) => {
-    const amount = Number(amounts[tenantId]);
-    if (!amount || amount <= 0) { toast('Enter a valid amount first', 'error'); return; }
-    
-    setStkSending(p => ({ ...p, [tenantId]: true }));
-    const res = await safeFetch(`${API}/api/mpesa/stkpush`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader() },
-      body: JSON.stringify({ phone, amount, tenantId })
-    });
-    setStkSending(p => ({ ...p, [tenantId]: false }));
-    
-    if (res?.__error) { toast(res.message, 'error'); return; }
-    if (res) { 
-      toast('MPESA prompt sent! Waiting for tenant to enter PIN...', 'success'); 
-      setAmounts(p => ({ ...p, [tenantId]: '' })); 
-    }
-  };
 
   return (
     <div style={{ animation: 'fadeUp 0.3s ease' }}>
@@ -153,14 +161,25 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
               )}
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <input className="app-input" type="number" placeholder="Payment amount (KES)" style={{ flex: 1, minWidth: 160 }}
+                <input className="app-input" type="number" placeholder="Expected amount (KES)" style={{ flex: 1, minWidth: 160 }}
                   value={amounts[t._id] || ''} onChange={e => setAmounts(p => ({ ...p, [t._id]: e.target.value }))} />
-                <button className="btn-pay" onClick={() => sendMpesaPrompt(t._id, t.phone)} disabled={stkSending[t._id]} style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
-                  {stkSending[t._id] ? 'Sending...' : '📲 STK Push'}
+                <button className="btn-outline" onClick={() => makePayment(t._id)}>
+                  Record Cash Payment
                 </button>
-                <button className="btn-outline" style={{ borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)' }} onClick={() => makePayment(t._id)}>
-                  Cash
-                </button>
+                <div style={{ background: 'rgba(16,185,129,0.1)', borderRadius: 8, padding: '10px 12px', fontSize: 13, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <div style={{ width: 24, height: 24, background: 'var(--accent-primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 12 }}>💳</div>
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: 2 }}>M-Pesa Payment</div>
+                      {c2bLoading ? (
+                        <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>PayBill: Loading...</div>
+                      ) : (
+                        <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>PayBill: <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{c2bConfig?.payBillNumber || 'XXXXXX'}</span></div>
+                      )}
+                      <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Account: <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{t.house?.houseNumber || t._id}</span></div>
+                    </div>
+                  </div>
+                </div>
                 <button className="btn-sms" onClick={() => sendReminder(t)} disabled={smsSending[t._id]}>
                   {smsSending[t._id] ? 'Sending...' : '📱 Remind'}
                 </button>
