@@ -6,30 +6,30 @@ export const theme = {
   colors: {
     // Primary brand colors
     primary: {
-      50: "#E1F5EE",
-      100: "#C8E6D9",
-      200: "#A5D6B7",
-      300: "#81C784",
-      400: "#66BB6A",
-      500: "#4CAF50", // Main primary color
-      600: "#43A047",
-      700: "#388E3C",
-      800: "#2E7D32",
-      900: "#1B5E20",
+      50: "#EEF2FF",
+      100: "#E0E7FF",
+      200: "#C7D2FE",
+      300: "#A5B4FC",
+      400: "#818CF8",
+      500: "#6366F1", // Main primary color
+      600: "#4F46E5",
+      700: "#4338CA",
+      800: "#3730A3",
+      900: "#312E81",
     },
 
     // Secondary colors
     secondary: {
-      50: "#FFF8E1",
-      100: "#FFECB3",
-      200: "#FFE082",
-      300: "#FFD54F",
-      400: "#FFCA28",
-      500: "#FFB300", // Main secondary color
-      600: "#FFA000",
-      700: "#FF8F00",
-      800: "#FF6F00",
-      900: "#FF6D00",
+      50: "#ECFEFF",
+      100: "#CFFAFE",
+      200: "#A5F3FC",
+      300: "#67E8F9",
+      400: "#22D3EE",
+      500: "#06B6D4", // Main secondary color
+      600: "#0891B2",
+      700: "#0E7490",
+      800: "#155E75",
+      900: "#164E63",
     },
 
     // Status colors
