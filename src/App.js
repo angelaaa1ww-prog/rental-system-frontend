@@ -1,3 +1,13 @@
+import { Analytics } from '@vercel/analytics/react';
+ 
+export default function App() {
+  return (
+    <div>
+      {/* ... */}
+      <Analytics />
+    </div>
+  );
+}
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const API = "https://rental-system-backend-1t05.onrender.com";
