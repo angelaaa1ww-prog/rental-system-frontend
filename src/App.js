@@ -888,7 +888,7 @@ export default function App() {
                       {/* Occupancy bar */}
                       <div style={card()}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-                          <span style={{fontSize:14,fontWeight:700,color:T.text}>Occupancy Rate</span>
+                          <span style={{fontSize:14,fontWeight:700,color:T.text}}>Occupancy Rate</span>
                           <span style={{fontSize:17,fontWeight:800,color:T.accent}}>{dash.occupancyRate}%</span>
                         </div>
                         <div style={{background:T.cardBorder,borderRadius:999,height:11,overflow:"hidden"}}>
