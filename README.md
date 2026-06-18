@@ -184,7 +184,7 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 
 # Admin credentials
-ADMIN_EMAIL=admin@rentals.co.ke
+ADMIN_EMAIL=giftedhandsventures.co.ke
 ADMIN_PASSWORD=your_secure_password
 
 # Africa's Talking

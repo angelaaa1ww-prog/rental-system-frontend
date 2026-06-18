@@ -658,7 +658,7 @@ export default function App() {
                 <div style={{display:"flex",flexDirection:"column",gap:14}}>
                   <div>
                     <Lbl T={T}>Email Address</Lbl>
-                    <input className="inp" type="email" placeholder="admin@rentals.co.ke"
+                    <input className="inp" type="email" placeholder="giftedhandsventures@rentals.co.ke"
                       value={email} onChange={e=>setEmail(e.target.value)}
                       onKeyDown={e=>e.key==="Enter"&&login()}/>
                   </div>
