@@ -2,12 +2,19 @@ import React, { useEffect, useState, useRef } from 'react';
 import { modernTheme } from '../theme-modern';
 
 const T = modernTheme;
-const ALLOWED_EMAIL = 'isowekesa@gmail.com';
+const DEFAULT_ALLOWED_EMAIL = 'isowekesa@gmail.com';
+const ALLOWED_EMAILS = (process.env.REACT_APP_AUTHORIZED_EMAILS || DEFAULT_ALLOWED_EMAIL)
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+const GOOGLE_LOAD_TIMEOUT_MS = 10000;
+const GOOGLE_POLL_INTERVAL_MS = 200;
 
 export function GoogleAuthComponent({ onSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userIP, setUserIP] = useState(null);
+  const [googleFailed, setGoogleFailed] = useState(false);
   const googleButtonRef = useRef(null);
 
   useEffect(() => {
@@ -17,27 +24,59 @@ export function GoogleAuthComponent({ onSuccess }) {
       .then((data) => setUserIP(data.ip))
       .catch(() => setUserIP('unknown'));
 
-    // Initialize Google Sign-In
-    if (window.google) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-          callback: handleGoogleAuth,
-        });
-
-        // Render the official Google button
-        if (googleButtonRef.current) {
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            theme: 'dark',
-            size: 'large',
-            width: '100%',
-            text: 'signin_with',
-          });
-        }
-      } catch (err) {
-        console.error('Google initialization error:', err);
-      }
+    if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+      console.error('REACT_APP_GOOGLE_CLIENT_ID is missing — check .env / Vercel env vars.');
+      setError('Google Sign-In is not configured. Missing client ID.');
+      setGoogleFailed(true);
+      return;
     }
+
+    let cancelled = false;
+    let elapsed = 0;
+
+    // index.html loads the GSI script with async/defer, so window.google
+    // may not exist yet on first render. Poll until it's actually ready
+    // instead of checking once and giving up.
+    const tryInitGoogle = () => {
+      if (cancelled) return;
+
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+            callback: handleGoogleAuth,
+          });
+
+          if (googleButtonRef.current) {
+            window.google.accounts.id.renderButton(googleButtonRef.current, {
+              theme: 'dark',
+              size: 'large',
+              width: '100%',
+              text: 'signin_with',
+            });
+          }
+        } catch (err) {
+          console.error('Google initialization error:', err);
+          setError('Failed to load Google Sign-In. Please refresh.');
+          setGoogleFailed(true);
+        }
+        return;
+      }
+
+      elapsed += GOOGLE_POLL_INTERVAL_MS;
+      if (elapsed >= GOOGLE_LOAD_TIMEOUT_MS) {
+        console.error('Google Identity Services script never became available.');
+        setGoogleFailed(true);
+        return;
+      }
+      setTimeout(tryInitGoogle, GOOGLE_POLL_INTERVAL_MS);
+    };
+
+    tryInitGoogle();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleGoogleAuth = async (response) => {
@@ -63,9 +102,9 @@ export function GoogleAuthComponent({ onSuccess }) {
 
       const userData = JSON.parse(jsonPayload);
 
-      // Verify email
-      if (userData.email !== ALLOWED_EMAIL) {
-        setError(`Access denied. Only ${ALLOWED_EMAIL} is authorized.`);
+      // Verify email against the allowed list
+      if (!ALLOWED_EMAILS.includes((userData.email || '').toLowerCase())) {
+        setError('Access denied. This Google account is not authorized.');
         setIsLoading(false);
         return;
       }
@@ -119,8 +158,8 @@ export function GoogleAuthComponent({ onSuccess }) {
         }}
       />
 
-      {/* Custom Fallback Button (if Google script fails) */}
-      {!window.google && (
+      {/* Custom Fallback Button (shown only once Google is confirmed unavailable) */}
+      {googleFailed && (
         <button
           onClick={() => window.location.href = 'https://accounts.google.com/'}
           style={{
