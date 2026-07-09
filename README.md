@@ -1,4 +1,4 @@
-# 🏢 Gifted Hands Ventures — Property Management System
+#  Gifted Hands Ventures — Property Management System
 
 <div align="center">
 
@@ -7,8 +7,7 @@
 ![Version](https://img.shields.io/badge/Version-3.0%20Production-C8960A?style=for-the-badge)
 
 **A full-stack property management web application built to replace Excel sheets with a smart, modern, mobile-friendly system — complete with M-Pesa payments, SMS/WhatsApp notifications, real-time dashboard, and enterprise-grade security.**
-
-[🌍 Live Demo](https://giftedhandsventures.vercel.app) · [📦 Frontend Repo](https://github.com/angelaaa1ww-prog/rental-system-frontend) · [⚙️ Backend Repo](https://github.com/angelaaa1ww-prog/rental-system-backend)
+[ Live Demo](https://giftedhandsventures.vercel.app) · [📦 Frontend Repo](https://github.com/angelaaa1ww-prog/rental-system-frontend) · [⚙️ Backend Repo](https://github.com/angelaaa1ww-prog/rental-system-backend)
 
 </div>
 
@@ -24,33 +23,33 @@
 
 ---
 
-## 🚀 About The Project
+## About The Project
 
 **Gifted Hands Ventures PMS** was built to solve a real problem — a landlord managing 5 apartments across Kenya using Excel spreadsheets. Tracking rent payments, tenant details, overdue balances, and sending reminders manually was time-consuming and error-prone.
 
 This system replaces all of that with a **single web application** that the landlord can access from any phone or computer, anywhere in the world.
 
-> Built by **Angela Amani** — at age 18, before joining campus. 🔥
+> Built by **Angela Amani** — at age 18, before joining campus. 
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🏠 Property Management
+###  Property Management
 - Add, edit and delete apartments and individual housing units
 - Track unit status — **Occupied** or **Vacant** in real time
 - Store house details: number, location, bedrooms, monthly rent
 - Filter and search houses by name, location or status
 - Houses grouped by apartment (A, B, C, D, E)
 
-### 👤 Tenant Management
+### Tenant Management
 - Add, edit and delete tenants with full details
 - Store name, phone number, national ID
 - Assign tenants to specific housing units instantly
 - View full **tenant profile** with complete payment history
 - Search tenants by name, phone or ID number
 
-### 💳 Payment Tracking
+###  Payment Tracking
 - Record **cash payments** manually with one click
 - **M-Pesa STK Push** — sends payment prompt directly to tenant's phone
 - Real-time payment confirmation via Safaricom Daraja callback
@@ -58,32 +57,32 @@ This system replaces all of that with a **single web application** that the land
 - Delete incorrect payment records instantly
 - Full payment history with dates, references and methods
 
-### 📊 Dashboard & Analytics
+### Dashboard & Analytics
 - Live overview of total houses, occupied, vacant units
 - Occupancy rate progress bar (color-coded green/amber/red)
 - Total income collected across all apartments
 - Overdue tenants list with exact balance owed
 - All data updates in real time
 
-### 📋 Monthly Reports
+###  Monthly Reports
 - Generate rent collection reports by month and year
 - See total income, number of transactions, average payment
 - Print reports directly from the browser
 - **Gifted Hands Ventures** branded report header
 
-### 📱 SMS Notifications (Africa's Talking)
+###  SMS Notifications (Africa's Talking)
 - Send rent reminders to individual tenants with one click
 - Broadcast one SMS to ALL tenants simultaneously
 - Custom message support — type your own or use default
 - **Automated cron jobs** — system sends reminders automatically:
-  - 📅 1st of every month → rent due notice to all unpaid tenants
-  - 🔔 10 days before due date → gentle reminder
-  - 🔔 3 days before due date → follow-up
-  - ⚠️ Due today → urgent reminder
-  - 🚨 Overdue 1-7 days → overdue warning
-  - 🚨 Overdue 8+ days → final urgent notice
+  - 1st of every month → rent due notice to all unpaid tenants
+ - 10 days before due date → gentle reminder
+  -  3 days before due date → follow-up
+  -  Due today → urgent reminder
+  -  Overdue 1-7 days → overdue warning
+  - Overdue 8+ days → final urgent notice
 
-### 🔐 Enterprise Security
+### Enterprise Security
 - **JWT Authentication** with 1-hour auto-expiry
 - **Account lockout** after 5 failed login attempts (15 min lock)
 - **Real-time SMS security alerts** to owner's phone on every login
@@ -91,7 +90,7 @@ This system replaces all of that with a **single web application** that the land
 - Token tampering detection — any modified token is rejected
 - HTTPS enforced on all endpoints
 
-### 🌙 UI/UX
+###  UI/UX
 - **Dark mode / Light mode** toggle — preference saved across sessions
 - Fully **mobile responsive** — works perfectly on any phone
 - **PWA** — installable on Android and iPhone like a real app
@@ -102,7 +101,7 @@ This system replaces all of that with a **single web application** that the land
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 | Technology | Purpose |
@@ -132,7 +131,7 @@ This system replaces all of that with a **single web application** that the land
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 rental-system/
@@ -175,7 +174,7 @@ rental-system/
 
 ---
 
-## ⚙️ Environment Variables
+##  Environment Variables
 
 ### Backend `.env`
 ```env
@@ -206,7 +205,7 @@ CLIENT_URL=https://your-frontend.vercel.app
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js v18+
@@ -261,7 +260,7 @@ http://localhost:3000
 
 ---
 
-## 🌍 Deployment
+##  Deployment
 
 | Service | Platform | URL |
 |---------|----------|-----|
@@ -271,7 +270,7 @@ http://localhost:3000
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 - ✅ JWT tokens expire after 1 hour
 - ✅ Account locks after 5 failed login attempts
@@ -284,7 +283,7 @@ http://localhost:3000
 
 ---
 
-## 📈 Future Roadmap
+## Future Roadmap
 
 - [ ] WhatsApp Business API integration
 - [ ] PDF receipt generation
@@ -296,16 +295,16 @@ http://localhost:3000
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 **Angela Amani**
 - GitHub: [@angelaaa1ww-prog](https://github.com/angelaaa1ww-prog)
-- Built at age 18, before joining campus 🚀
+- Built at age 18, before joining campus 
 - Location: Nairobi, Kenya 🇰🇪
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 - [Safaricom Daraja API](https://developer.safaricom.co.ke) — M-Pesa integration
 - [Africa's Talking](https://africastalking.com) — SMS notifications
@@ -317,11 +316,11 @@ http://localhost:3000
 
 <div align="center">
 
-**Built with ❤️ in Nairobi, Kenya 🇰🇪**
+**Built with  in Nairobi, Kenya 🇰🇪**
 
 *"Replacing Excel sheets with smart technology — one apartment at a time."*
 
-⭐ Star this repo if you found it useful!
+Star this repo if you found it useful!
 
 </div>
 
