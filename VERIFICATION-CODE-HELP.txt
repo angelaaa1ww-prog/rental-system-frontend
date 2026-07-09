@@ -1,0 +1,101 @@
+⚠️ YOU SEE A VERIFICATION CODE REQUEST
+
+This could be TWO different things. Follow the guide based on what you see:
+
+═════════════════════════════════════════════════════════════════════════════
+
+CASE 1: YOU SEE THIS (IP Verification Modal in our app)
+
+┌────────────────────────────────────────────────┐
+│  New Login Location Detected                   │
+├────────────────────────────────────────────────┤
+│  We detected a login from a new IP address:    │
+│  [123.456.789.012]                             │
+│                                                 │
+│  For your security, please verify this is you. │
+│  Check your email for a verification code.     │
+│                                                 │
+│  [Enter verification code]                     │
+│                                                 │
+│  [Skip for Now]  [Verify]                      │
+└────────────────────────────────────────────────┘
+
+✅ SOLUTION: Click "Skip for Now" button
+   (In development/testing, no actual verification needed)
+
+═════════════════════════════════════════════════════════════════════════════
+
+CASE 2: YOU SEE GOOGLE'S AUTHENTICATION POPUP
+
+This looks like Google's official login screen asking for:
+- 2-Factor Authentication (2FA)
+- Phone verification
+- Email verification
+- Backup codes
+
+✅ SOLUTION:
+   A) Check your email for Google verification code
+      • Look in: isowekesa@gmail.com inbox
+      • Check: Spam folder too
+      • Look for: Email with 6-digit code from Google
+   
+   B) Check your phone for SMS code
+      • Google might send SMS instead
+      • Look for: Text message with code
+   
+   C) If 2FA enabled:
+      • Use your authenticator app
+      • Or use backup code if you have one
+   
+   D) If nothing arrives:
+      • Click "Didn't get a code?" or "Try another method"
+      • Use phone/email/authenticator app instead
+
+═════════════════════════════════════════════════════════════════════════════
+
+CASE 3: YOU DON'T SEE ANYTHING, JUST STUCK
+
+Your browser might be:
+- Loading slowly
+- Showing blank screen
+- Frozen
+
+✅ SOLUTION:
+   1. Wait 10 seconds (loading)
+   2. If still stuck, Refresh: Ctrl+R
+   3. If error appears, take screenshot
+   4. Try again
+
+═════════════════════════════════════════════════════════════════════════════
+
+WHICH CASE ARE YOU IN?
+
+Tell me:
+1. What text do you see on screen?
+2. Are there buttons? What do they say?
+3. Take a screenshot (press Print Screen, paste in Paint, save)
+
+Then I can help you!
+
+═════════════════════════════════════════════════════════════════════════════
+
+QUICK FIX - TRY THIS NOW:
+
+1. Close Google popup if open
+2. Hard refresh: Ctrl + Shift + R
+3. Try signing in again
+4. If IP modal appears → Click "Skip for Now"
+5. You should be logged in!
+
+═════════════════════════════════════════════════════════════════════════════
+
+FOR DEVELOPMENT/TESTING:
+
+The IP Verification is just a SECURITY FEATURE we built.
+In development, it's OK to skip it.
+In production, it would send real verification codes to your email.
+
+So DON'T worry about finding codes during testing.
+Just click "Skip for Now" and continue!
+
+═════════════════════════════════════════════════════════════════════════════

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ghv-rental-v2';
+const CACHE_NAME = 'ghv-rental-v3';
 const urlsToCache = ['/', '/index.html', '/manifest.json'];
 
 // =============================================
@@ -64,8 +64,8 @@ self.addEventListener('push', event => {
     vibrate: [200, 100, 200],
     data:    { url: data.url || '/' },
     actions: [
-      { action: 'open',    title: '📲 Open App' },
-      { action: 'dismiss', title: '✕ Dismiss'   },
+      { action: 'open',    title: 'Open App' },
+      { action: 'dismiss', title: 'Dismiss'  },
     ],
     requireInteraction: data.urgent || false,
   };

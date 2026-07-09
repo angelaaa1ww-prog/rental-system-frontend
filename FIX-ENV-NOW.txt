@@ -1,0 +1,75 @@
+🔴 WRONG - YOUR CURRENT .env
+
+REACT_APP_API_URL=http://localhost:3001/28119385177-smkgbc4ih19ji6mbo50eqh6uc1v6rmeq.apps.googleusercontent.com
+
+❌ PROBLEM: You put your Google Client ID in the wrong place!
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ CORRECT - THIS IS HOW IT SHOULD BE:
+
+REACT_APP_GOOGLE_CLIENT_ID=28119385177-smkgbc4ih19ji6mbo50eqh6uc1v6rmeq.apps.googleusercontent.com
+REACT_APP_API_URL=http://localhost:3001/api
+REACT_APP_ENV=development
+REACT_APP_ENABLE_IP_VERIFICATION=true
+REACT_APP_ENABLE_TERMS_MODAL=true
+REACT_APP_ENABLE_PARTICLE_EFFECTS=true
+REACT_APP_AUTHORIZED_EMAIL=isowekesa@gmail.com
+REACT_APP_POLICY_VERSION=2026-07-07
+
+═════════════════════════════════════════════════════════════════════════════
+
+FIX IT NOW:
+
+1. Open File Explorer
+2. Go to: C:\Users\angel\OneDrive\Desktop\rental_system\frontend
+3. Find the file: .env (if you don't see it, enable "Show hidden files" in View menu)
+4. Right-click → Open with → Notepad
+5. DELETE EVERYTHING
+6. PASTE THIS (update the Client ID with yours):
+
+REACT_APP_GOOGLE_CLIENT_ID=28119385177-smkgbc4ih19ji6mbo50eqh6uc1v6rmeq.apps.googleusercontent.com
+REACT_APP_API_URL=http://localhost:3001/api
+REACT_APP_ENV=development
+REACT_APP_ENABLE_IP_VERIFICATION=true
+REACT_APP_ENABLE_TERMS_MODAL=true
+REACT_APP_ENABLE_PARTICLE_EFFECTS=true
+REACT_APP_AUTHORIZED_EMAIL=isowekesa@gmail.com
+REACT_APP_POLICY_VERSION=2026-07-07
+
+7. Save (Ctrl+S)
+8. Close Notepad
+
+═════════════════════════════════════════════════════════════════════════════
+
+THEN RESTART:
+
+1. Open Command Prompt
+2. Paste and press Enter:
+   cd C:\Users\angel\OneDrive\Desktop\rental_system\frontend
+
+3. Stop old app if running (Ctrl+C)
+4. Paste and press Enter:
+   npm start
+
+5. Wait 2-3 minutes
+6. Browser opens
+7. Accept Terms
+8. Click Google Sign-In button
+9. ✅ WORKS!
+
+═════════════════════════════════════════════════════════════════════════════
+
+KEY POINTS:
+
+✅ REACT_APP_GOOGLE_CLIENT_ID = Your long Google ID (the one you just pasted)
+✅ REACT_APP_API_URL = http://localhost:3001/api (JUST THIS)
+
+NOT:
+❌ REACT_APP_API_URL = http://localhost:3001/[YOUR_GOOGLE_ID]
+
+═════════════════════════════════════════════════════════════════════════════
+
+GOT IT?
+
+Now fix your .env file and restart the app!

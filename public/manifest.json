@@ -1,7 +1,7 @@
 {
-  "short_name": "GHV Rentals",
-  "name": "Gifted Hands Ventures",
-  "description": "Property Management System",
+  "short_name": "Rental OS",
+  "name": "Gifted Hands Rental OS",
+  "description": "Gifted Hands Ventures rental operations console",
   "icons": [
     {
       "src": "logo192.png",
@@ -18,7 +18,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#0A7A4B",
-  "background_color": "#0A2E1C",
+  "theme_color": "#007F6D",
+  "background_color": "#F6FBF8",
   "orientation": "portrait-primary"
 }

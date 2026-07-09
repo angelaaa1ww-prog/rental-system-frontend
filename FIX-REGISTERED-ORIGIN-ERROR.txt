@@ -1,0 +1,128 @@
+🔴 ERROR: "no registered origin" + "Error 401: invalid_client"
+
+This means: Google doesn't recognize http://localhost:3000 as an authorized location.
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ FIX - ADD http://localhost:3000 TO GOOGLE CLOUD CONSOLE
+
+STEP 1: Go to Google Cloud Console
+• Open: https://console.cloud.google.com/
+
+STEP 2: Select Your Project
+• Click project dropdown (top left)
+• Select: "PropertyFlow" (or whatever you named it)
+
+STEP 3: Go to Credentials
+• Left sidebar → "APIs & Services"
+• Click: "Credentials"
+
+STEP 4: Edit OAuth Credentials
+• Find: "OAuth 2.0 Client IDs"
+• Find: "Web application" (the one you created)
+• Click it (or click edit pencil icon)
+
+STEP 5: Add Authorized Origins
+Look for: "Authorized JavaScript origins"
+
+Add BOTH of these:
+□ http://localhost:3000
+□ http://127.0.0.1:3000
+
+(Click "Add URI" button for each one)
+
+STEP 6: Add Authorized Redirect URIs
+Look for: "Authorized redirect URIs"
+
+Add BOTH of these:
+□ http://localhost:3000
+□ http://localhost:3000/
+□ http://127.0.0.1:3000
+
+(Click "Add URI" button for each one)
+
+STEP 7: SAVE
+• Click the blue "SAVE" button at bottom
+
+STEP 8: Wait 1 minute
+• Changes take ~1 minute to apply
+
+═════════════════════════════════════════════════════════════════════════════
+
+THEN TRY AGAIN:
+
+1. Go back to your app: http://localhost:3000
+2. Refresh page: F5 or Ctrl+R
+3. Accept Terms
+4. Click "Sign In with Google"
+5. ✅ Should work now!
+
+═════════════════════════════════════════════════════════════════════════════
+
+SCREENSHOTS OF WHERE TO ADD:
+
+In Google Cloud Console → Credentials page:
+
+You see a section with this info:
+┌─────────────────────────────────────┐
+│ OAuth 2.0 Web Application           │
+├─────────────────────────────────────┤
+│ Authorized JavaScript origins:      │
+│ [Add URI] [Add URI]                 │
+│   □ http://localhost:3000           │ ← ADD THIS
+│   □ http://127.0.0.1:3000           │ ← ADD THIS
+├─────────────────────────────────────┤
+│ Authorized redirect URIs:           │
+│ [Add URI] [Add URI]                 │
+│   □ http://localhost:3000           │ ← ADD THIS
+│   □ http://localhost:3000/          │ ← ADD THIS
+│   □ http://127.0.0.1:3000           │ ← ADD THIS
+├─────────────────────────────────────┤
+│                  [SAVE]              │
+└─────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════
+
+STILL NOT WORKING?
+
+Try these:
+
+1. Hard Refresh: Ctrl + Shift + R (clears cache)
+2. Open in Incognito: Ctrl + Shift + N (fresh browser)
+3. Check Client ID: Is it in .env file? 
+   • Open .env
+   • See REACT_APP_GOOGLE_CLIENT_ID=...
+   • Copy it
+   • Go to Google Console
+   • Check it matches the one you created
+4. Wait 2 minutes: Sometimes Google takes time to sync
+
+═════════════════════════════════════════════════════════════════════════════
+
+COMMON MISTAKES:
+
+❌ Only added http://localhost:3000 (forgot http://127.0.0.1:3000)
+❌ Added http://localhost:3001 (wrong port - should be 3000)
+❌ Added http://localhost:3000/ (with trailing slash only, need both with and without)
+❌ Didn't click SAVE button
+❌ Used IP address instead of localhost
+
+✅ Add ALL of these:
+   • http://localhost:3000
+   • http://127.0.0.1:3000
+   • http://localhost:3000/ (with trailing slash)
+
+═════════════════════════════════════════════════════════════════════════════
+
+NEED HELP?
+
+1. Take a screenshot of your Google Console credentials page
+2. Show me what's in the "Authorized JavaScript origins" section
+3. Show me what's in the "Authorized redirect URIs" section
+4. Tell me if you see the SAVE button at bottom
+
+Then I can help you from there!
+
+═════════════════════════════════════════════════════════════════════════════
+
+GO FIX IT NOW! 🔧
