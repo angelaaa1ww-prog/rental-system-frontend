@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleAuthComponent, IPVerificationModal } from '../components/GoogleAuth';
 import { TermsAndPrivacyModal } from '../components/TermsModal';
 
@@ -53,41 +53,6 @@ function Button({ children, icon, tone = 'primary', className = '', ...props }) 
   );
 }
 
-function ParticleField() {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 54 }, (_, index) => ({
-        id: index,
-        left: `${(index * 37) % 101}%`,
-        top: `${(index * 61) % 101}%`,
-        size: `${2 + (index % 5)}px`,
-        delay: `${(index % 11) * -0.7}s`,
-        duration: `${12 + (index % 7)}s`,
-        dx: `${((index % 9) - 4) * 10}px`,
-        dy: `${((index % 7) - 3) * 12}px`
-      })),
-    []
-  );
-
-  return (
-    <div className="particle-field" aria-hidden="true">
-      {particles.map((particle) => (
-        <span
-          key={particle.id}
-          style={{
-            '--x': particle.left,
-            '--y': particle.top,
-            '--s': particle.size,
-            '--delay': particle.delay,
-            '--duration': particle.duration,
-            '--dx': particle.dx,
-            '--dy': particle.dy
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function LoginPage({ onLoginSuccess }) {
   const [showTerms, setShowTerms] = useState(true);
@@ -137,7 +102,6 @@ export function LoginPage({ onLoginSuccess }) {
 
   return (
     <main className="auth-screen">
-      <ParticleField />
       <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" className="floating-theme" onClick={onTheme} />
       <section className="auth-layout">
         <div className="auth-story">

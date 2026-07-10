@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { modernTheme } from '../theme-modern';
 import { API, safeFetch } from '../api';
+import { Icon } from './ui';
 
-const T = modernTheme;
 const DEFAULT_ALLOWED_EMAIL = 'isowekesa@gmail.com';
 const ALLOWED_EMAILS = (process.env.REACT_APP_AUTHORIZED_EMAILS || DEFAULT_ALLOWED_EMAIL)
   .split(',')
@@ -35,9 +34,6 @@ export function GoogleAuthComponent({ onSuccess }) {
     let cancelled = false;
     let elapsed = 0;
 
-    // index.html loads the GSI script with async/defer, so window.google
-    // may not exist yet on first render. Poll until it's actually ready
-    // instead of checking once and giving up.
     const tryInitGoogle = () => {
       if (cancelled) return;
 
@@ -50,7 +46,7 @@ export function GoogleAuthComponent({ onSuccess }) {
 
           if (googleButtonRef.current) {
             window.google.accounts.id.renderButton(googleButtonRef.current, {
-              theme: 'dark',
+              theme: 'outline',
               size: 'large',
               width: '100%',
               text: 'signin_with',
@@ -78,6 +74,7 @@ export function GoogleAuthComponent({ onSuccess }) {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGoogleAuth = async (response) => {
@@ -176,50 +173,33 @@ export function GoogleAuthComponent({ onSuccess }) {
       {/* Custom Fallback Button (shown only once Google is confirmed unavailable) */}
       {googleFailed && (
         <button
+          className="btn-primary"
           onClick={() => window.location.href = 'https://accounts.google.com/'}
           style={{
             width: '100%',
-            padding: '0.875rem 1.5rem',
-            background: T.colors.gradients.primaryGradient,
-            color: 'white',
-            border: 'none',
-            borderRadius: T.borderRadius.lg,
-            fontSize: '1rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.75rem',
-            transition: 'all 0.3s ease',
-            boxShadow: T.shadows.lg,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = T.shadows.xl;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = T.shadows.lg;
+            padding: '0.75rem 1.5rem',
+            fontSize: '0.95rem',
+            minHeight: '42px'
           }}
         >
-          <span>🔑</span>
-          <span>Sign In with Google</span>
+          <Icon name="key" size={16} />
+          Sign In with Google
         </button>
       )}
 
       {error && (
         <div
           style={{
-            padding: '1rem',
-            background: T.colors.error[900],
-            border: `1px solid ${T.colors.error[500]}`,
-            borderRadius: T.borderRadius.lg,
-            color: T.colors.error[200],
-            fontSize: '0.875rem',
+            padding: '0.75rem 1rem',
+            background: 'var(--danger-soft)',
+            border: '1px solid var(--danger)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--danger)',
+            fontSize: '0.85rem',
             maxWidth: '400px',
             width: '100%',
             textAlign: 'center',
+            fontWeight: 500
           }}
         >
           {error}
@@ -229,39 +209,30 @@ export function GoogleAuthComponent({ onSuccess }) {
       {isLoading && (
         <div
           style={{
-            color: T.colors.text.secondary,
-            fontSize: '0.95rem',
+            color: 'var(--muted)',
+            fontSize: '0.9rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
           }}
         >
-          <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
+          <span className="loader small" style={{ display: 'inline-block' }} />
           Verifying your credentials...
         </div>
       )}
 
       {userIP && (
-        <p style={{ fontSize: '0.75rem', color: T.colors.text.disabled, marginTop: '1rem' }}>
+        <p style={{ fontSize: '0.75rem', color: 'var(--subtle)', marginTop: '0.5rem', margin: 0 }}>
           Your IP: {userIP}
         </p>
       )}
-
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
 
 export function IPVerificationModal({ isOpen, currentIP, onVerify, onSkip }) {
-  const [code, setCode] = useState('');
-
-  // In development, auto-skip IP verification after 2 seconds
-  React.useEffect(() => {
+  // In development, auto-skip IP verification after 1.5 seconds
+  useEffect(() => {
     if (isOpen && process.env.REACT_APP_ENV === 'development') {
       const timer = setTimeout(() => {
         onSkip();
@@ -280,65 +251,55 @@ export function IPVerificationModal({ isOpen, currentIP, onVerify, onSkip }) {
         left: 0,
         right: 0,
         bottom: 0,
-        background: T.colors.dark.overlay,
+        background: 'rgba(0, 0, 0, 0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 999,
-        backdropFilter: 'blur(8px)',
+        zIndex: 1000,
+        backdropFilter: 'blur(4px)',
       }}
     >
       <div
         style={{
-          background: T.colors.dark.surface,
-          borderRadius: T.borderRadius['2xl'],
-          border: `1px solid ${T.colors.dark.border}`,
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--line)',
           padding: '2rem',
-          maxWidth: '500px',
+          maxWidth: '460px',
           width: '90%',
-          boxShadow: T.shadows.xl,
+          boxShadow: 'var(--shadow-lg)',
           textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem'
         }}
       >
-        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>✅</div>
-        <h2 style={{ marginBottom: '1rem', color: T.colors.text.primary }}>
+        <div style={{ color: 'var(--success)' }}>
+          <Icon name="checkCircle" size={48} />
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--ink)', margin: 0 }}>
           Verifying Your Login
         </h2>
-        <p style={{ color: T.colors.text.secondary, marginBottom: '0.5rem' }}>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
           New location detected: <strong>{currentIP}</strong>
         </p>
-        <p style={{ color: T.colors.text.hint, marginBottom: '2rem', fontSize: '0.875rem' }}>
+        <p style={{ color: 'var(--subtle)', fontSize: '0.8rem', margin: 0 }}>
           Auto-verifying in development mode...
         </p>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', width: '100%', gap: '0.5rem', marginTop: '0.5rem' }}>
           <button
+            className="btn-primary"
             onClick={() => onSkip()}
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              background: T.colors.gradients.primaryGradient,
-              border: 'none',
-              borderRadius: T.borderRadius.lg,
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 600,
-              transition: 'all 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = T.shadows.lg;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
+            style={{ flex: 1, padding: '0.6rem' }}
           >
             Continue Now
           </button>
         </div>
 
-        <p style={{ color: T.colors.text.disabled, fontSize: '0.7rem', marginTop: '1.5rem' }}>
-          🔒 In production, verification codes will be sent to your email.
+        <p style={{ color: 'var(--subtle)', fontSize: '0.7rem', margin: 0, marginTop: '0.5rem' }}>
+          In production, verification codes will be sent to your email.
         </p>
       </div>
     </div>

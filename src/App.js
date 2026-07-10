@@ -2,18 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { LoginPage } from './pages/LoginPage';
 import { EnhancedDashboard } from './pages/EnhancedDashboard';
-import { generateModernGlobalStyles } from './theme-modern';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Inject modern global styles
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = generateModernGlobalStyles();
-    document.head.appendChild(styleSheet);
-
     // Load script for Google Sign-In
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';

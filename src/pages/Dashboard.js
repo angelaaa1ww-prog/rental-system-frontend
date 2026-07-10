@@ -90,10 +90,12 @@ export default function Dashboard({ onPageChange, reminders = [] }) {
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--danger)' }}>
-        <span style={{ fontSize: '3rem' }}>⚠️</span>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+          <Icon name="alertTriangle" size={48} className="text-danger" />
+        </div>
         <p style={{ fontWeight: 600, margin: '1rem 0', fontSize: '18px' }}>Failed to sync liveboard</p>
         <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '1.5rem' }}>{error}</p>
-        <button className="button button-primary" onClick={() => load()}>Try Again</button>
+        <button className="btn-primary" onClick={() => load()}>Try Again</button>
       </div>
     );
   }
@@ -235,17 +237,17 @@ export default function Dashboard({ onPageChange, reminders = [] }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {overdueCount > 0 && <span className="tag tag-danger">{overdueCount} pending</span>}
-            <button onClick={() => load(true)} disabled={refreshing} className="button button-ghost" style={{ minHeight: '34px', padding: '0 12px' }}>
-              {refreshing ? 'Syncing...' : '↻ Refresh'}
+            <button onClick={() => load(true)} disabled={refreshing} className="btn-outline btn-sm" style={{ minHeight: '34px', padding: '0 12px' }}>
+              {refreshing ? 'Syncing...' : 'Refresh'}
             </button>
           </div>
         </div>
 
         {!data.overdueTenants?.length ? (
           <div className="empty-state" style={{ padding: '3rem 0' }}>
-            <span className="empty-icon" style={{ fontSize: '2.5rem' }}>🎉</span>
+            <span className="empty-icon"><Icon name="checkCircle" size={28} /></span>
             <strong style={{ display: 'block', fontSize: '18px', color: 'var(--primary)', marginTop: '0.5rem' }}>
-              All accounts are clean!
+              All accounts are clean
             </strong>
             <p>No overdue tenant payments currently flagged.</p>
           </div>

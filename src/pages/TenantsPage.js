@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API, authHeader, safeFetch } from '../api';
-import { Avatar, Field, MiniStat, EmptyState, ConfirmModal, cardStyle, cardTitleStyle } from '../components/ui';
+import { Avatar, Field, MiniStat, EmptyState, ConfirmModal, Icon } from '../components/ui';
 
 export default function TenantsPage({ tenants, houses, balances, onRefresh, toast }) {
   const [name, setName]       = useState('');
@@ -49,7 +49,6 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
     setDelConfirm(null);
   };
 
-  // Fetch C2B configuration for payment instructions
   const fetchC2bConfig = async () => {
     setC2bLoading(true);
     try {
@@ -57,7 +56,6 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
       if (res && !res.__error) {
         setC2bConfig(res);
       } else {
-        // Fallback to a default value if config fetch fails
         setC2bConfig({ payBillNumber: "XXXXXX", accountReferenceFormat: "Tenant ID or House Number" });
       }
     } catch (error) {
@@ -68,7 +66,6 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
     }
   };
 
-  // Fetch C2B config when component mounts
   React.useEffect(() => {
     fetchC2bConfig();
   }, []);
@@ -86,7 +83,7 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
 
   const sendReminder = async (tenant) => {
     const bal = balances[tenant._id] || {};
-    const msg = `Dear ${tenant.name}, your rent balance is KES ${(bal.balance || 0).toLocaleString()}. Please pay promptly. Thank you - Rental Manager.`;
+    const msg = `Dear ${tenant.name}, your rent balance is KES ${(bal.balance || 0).toLocaleString()}. Please pay promptly. Thank you - Gifted Hands.`;
     setSmsSending(p => ({ ...p, [tenant._id]: true }));
     const res = await safeFetch(`${API}/api/sms/send`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader() },
@@ -97,98 +94,107 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
     else toast(res?.message || 'SMS failed', 'error');
   };
 
-
   return (
-    <div style={{ animation: 'fadeUp 0.3s ease' }}>
+    <div className="page-stack" style={{ animation: 'fadeUp 0.3s ease' }}>
       <ConfirmModal open={!!delConfirm} title="Delete Tenant?" message="This will permanently remove this tenant and free their house. This cannot be undone." danger onConfirm={() => deleteTenant(delConfirm)} onCancel={() => setDelConfirm(null)} />
       <ConfirmModal open={!!vacateConfirm} title="Vacate Tenant?" message="This will remove the tenant from their house and mark it as vacant. The tenant will NOT be deleted." onConfirm={() => vacateTenant(vacateConfirm)} onCancel={() => setVacateConfirm(null)} />
 
-      <div style={cardStyle}>
-        <h2 style={cardTitleStyle}>Add New Tenant</h2>
+      <div className="surface">
+        <div className="section-head" style={{ marginBottom: '1.25rem' }}>
+          <h2>Add New Tenant</h2>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12 }}>
           <Field label="Full Name *"><input className="app-input" placeholder="e.g. John Kamau" value={name} onChange={e => setName(e.target.value)} /></Field>
           <Field label="Phone Number *"><input className="app-input" placeholder="e.g. 0712345678" value={phone} onChange={e => setPhone(e.target.value)} /></Field>
           <Field label="ID Number (optional)"><input className="app-input" placeholder="National ID" value={idNumber} onChange={e => setIdNumber(e.target.value)} /></Field>
-          <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="btn-primary" onClick={addTenant} style={{ width: '100%', padding: '10px 0' }}>+ Add Tenant</button></div>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="btn-primary" onClick={addTenant} style={{ width: '100%', minHeight: '38px' }}><Icon name="plus" size={16} /> Add Tenant</button></div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {tenants.map(t => {
           const bal = balances[t._id] || { rent: 0, paid: 0, balance: 0 };
           const pct = bal.rent > 0 ? Math.min(100, Math.round((bal.paid / bal.rent) * 100)) : 0;
           const assignedHouse = t.house;
           return (
             <div className="tenant-card" key={t._id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <Avatar name={t.name} />
                   <div>
-                    <p style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-main)', letterSpacing: '0.02em' }}>{t.name}</p>
-                    <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
+                    <p style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ink)' }}>{t.name}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {t.phone}{t.idNumber ? ` • ID: ${t.idNumber}` : ''}
-                      {assignedHouse ? <span style={{ color: 'var(--accent-secondary)', fontWeight: 600 }}> • 🏠 {assignedHouse.houseNumber}</span> : <span style={{ color: '#64748b' }}> • No house</span>}
+                      {assignedHouse ? (
+                        <span className="tag tag-success" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <Icon name="home" size={10} /> {assignedHouse.houseNumber}
+                        </span>
+                      ) : (
+                        <span className="tag tag-neutral">No house</span>
+                      )}
                     </p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   {assignedHouse ? (
-                    <button className="btn-sm" style={{ background: 'var(--warning-bg)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }} onClick={() => setVacateConfirm(t._id)}>🚪 Vacate</button>
+                    <button className="btn-outline btn-sm" style={{ borderColor: 'var(--amber)', color: 'var(--amber)' }} onClick={() => setVacateConfirm(t._id)}>Vacate</button>
                   ) : (
-                    <select className="app-select" style={{ width: 'auto', minWidth: 160, fontSize: 13, padding: '8px 12px' }} defaultValue="" onChange={e => assignHouse(t._id, e.target.value)}>
+                    <select className="app-select" style={{ width: 'auto', minWidth: 160, fontSize: '0.8rem', padding: '0.25rem 0.5rem', minHeight: '30px' }} defaultValue="" onChange={e => assignHouse(t._id, e.target.value)}>
                       <option value="">Assign House</option>
                       {houses.filter(h => h.status === 'vacant').map(h => (
                         <option key={h._id} value={h._id}>{h.houseNumber} — KES {(h.rent || 0).toLocaleString()}</option>
                       ))}
                     </select>
                   )}
-                  <button className="btn-sm" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => setDelConfirm(t._id)}>🗑</button>
+                  <button className="btn-outline btn-danger btn-sm" style={{ padding: '0 8px', minHeight: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setDelConfirm(t._id)}>
+                    <Icon name="trash" size={14} />
+                  </button>
                 </div>
               </div>
 
               {assignedHouse && (
-                <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: '16px 20px', marginBottom: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                    <MiniStat label="Monthly Rent" value={`KES ${(bal.rent || 0).toLocaleString()}`} color="var(--accent-secondary)" />
-                    <MiniStat label="Paid" value={`KES ${(bal.paid || 0).toLocaleString()}`} color="var(--accent-primary)" />
-                    <MiniStat label="Balance" value={`KES ${(bal.balance || 0).toLocaleString()}`} color={bal.balance > 0 ? 'var(--danger)' : 'var(--accent-primary)'} />
+                <div style={{ background: 'var(--surface-soft)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem', border: '1px solid var(--line)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                    <MiniStat label="Monthly Rent" value={`KES ${(bal.rent || 0).toLocaleString()}`} color="var(--blue)" />
+                    <MiniStat label="Paid" value={`KES ${(bal.paid || 0).toLocaleString()}`} color="var(--success)" />
+                    <MiniStat label="Balance" value={`KES ${(bal.balance || 0).toLocaleString()}`} color={bal.balance > 0 ? 'var(--danger)' : 'var(--success)'} />
                   </div>
-                  <div style={{ height: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 999, overflow: 'hidden', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? 'var(--accent-primary)' : pct >= 50 ? '#f59e0b' : 'var(--danger)', borderRadius: 999, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: `0 0 10px ${pct === 100 ? 'rgba(16,185,129,0.5)' : pct >= 50 ? 'rgba(245,158,11,0.5)' : 'rgba(239,68,68,0.5)'}` }} />
+                  <div className="progress" style={{ height: 6 }}>
+                    <span style={{ width: `${pct}%`, background: pct === 100 ? 'var(--success)' : pct >= 50 ? 'var(--amber)' : 'var(--danger)' }} />
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, textAlign: 'right', fontWeight: 500 }}>{pct}% paid</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 6, textAlign: 'right', fontWeight: 500 }}>{pct}% paid</p>
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <input className="app-input" type="number" placeholder="Expected amount (KES)" style={{ flex: 1, minWidth: 160 }}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <input className="app-input" type="number" placeholder="Expected amount (KES)" style={{ flex: '1 1 180px', minHeight: '34px', fontSize: '0.85rem' }}
                   value={amounts[t._id] || ''} onChange={e => setAmounts(p => ({ ...p, [t._id]: e.target.value }))} />
-                <button className="btn-outline" onClick={() => makePayment(t._id)}>
+                <button className="btn-outline btn-sm" style={{ minHeight: '34px' }} onClick={() => makePayment(t._id)}>
                   Record Cash Payment
                 </button>
-                <div style={{ background: 'rgba(16,185,129,0.1)', borderRadius: 8, padding: '10px 12px', fontSize: 13, flexShrink: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                    <div style={{ width: 24, height: 24, background: 'var(--accent-primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 12 }}>💳</div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: 2 }}>M-Pesa Payment</div>
-                      {c2bLoading ? (
-                        <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>PayBill: Loading...</div>
-                      ) : (
-                        <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>PayBill: <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{c2bConfig?.payBillNumber || 'XXXXXX'}</span></div>
-                      )}
-                      <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Account: <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{t.house?.houseNumber || t._id}</span></div>
-                    </div>
+                
+                <div style={{ background: 'var(--primary-soft)', border: '1px solid rgba(20, 184, 166, 0.15)', borderRadius: 'var(--radius)', padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Icon name="creditCard" size={14} className="text-primary" />
+                  <div>
+                    <span style={{ color: 'var(--muted)', display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 600 }}>M-Pesa PayBill</span>
+                    <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
+                      {c2bLoading ? '...' : c2bConfig?.payBillNumber}
+                    </span>
+                    <span style={{ color: 'var(--muted)', fontSize: '0.7rem', marginLeft: 8 }}>
+                      Acc: <strong>{t.house?.houseNumber || t._id}</strong>
+                    </span>
                   </div>
                 </div>
-                <button className="btn-sms" onClick={() => sendReminder(t)} disabled={smsSending[t._id]}>
-                  {smsSending[t._id] ? 'Sending...' : '📱 Remind'}
+
+                <button className="btn-sms btn-sm" style={{ minHeight: '34px', marginLeft: 'auto' }} onClick={() => sendReminder(t)} disabled={smsSending[t._id]}>
+                  {smsSending[t._id] ? 'Sending...' : 'Remind'}
                 </button>
               </div>
             </div>
           );
         })}
       </div>
-      {!tenants.length && <EmptyState icon="👤" title="No tenants yet" sub="Add your first tenant above" />}
+      {!tenants.length && <EmptyState icon="user" title="No tenants yet" sub="Add your first tenant above" />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { API, authHeader, safeFetch } from '../api';
-import { Field, StatusPill, EmptyState, ConfirmModal, cardStyle, cardTitleStyle } from '../components/ui';
+import { Field, StatusPill, EmptyState, ConfirmModal, Icon } from '../components/ui';
 
 export default function HousesPage({ houses, apartments, onRefresh, toast }) {
   const [houseNumber, setHouseNumber] = useState('');
@@ -31,18 +31,20 @@ export default function HousesPage({ houses, apartments, onRefresh, toast }) {
   };
 
   return (
-    <div style={{ animation: 'fadeUp 0.3s ease' }}>
+    <div className="page-stack" style={{ animation: 'fadeUp 0.3s ease' }}>
       <ConfirmModal open={!!delConfirm} title="Delete House?" message="This will permanently remove this house. This action cannot be undone." danger onConfirm={() => deleteHouse(delConfirm)} onCancel={() => setDelConfirm(null)} />
 
-      <div style={cardStyle}>
-        <h2 style={cardTitleStyle}>Add New House</h2>
+      <div className="surface">
+        <div className="section-head" style={{ marginBottom: '1.25rem' }}>
+          <h2>Add New House</h2>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12 }}>
           <Field label="House Number"><input className="app-input" placeholder="e.g. A101" value={houseNumber} onChange={e => setHouseNumber(e.target.value)} /></Field>
           <Field label="Location"><input className="app-input" placeholder="e.g. Kiambu Rd" value={location} onChange={e => setLocation(e.target.value)} /></Field>
           <Field label="Apartment"><select className="app-select" value={apartment} onChange={e => setApartment(e.target.value)}>{apartments.map(a => <option key={a} value={a}>Apartment {a}</option>)}</select></Field>
           <Field label="Bedrooms"><select className="app-select" value={bedrooms} onChange={e => handleBedrooms(Number(e.target.value))}>{[1, 2, 3, 4].map(n => <option key={n} value={n}>{n} Bedroom{n > 1 ? 's' : ''}</option>)}</select></Field>
           <Field label="Rent (KES)"><input className="app-input" value={rent ? `KES ${Number(rent).toLocaleString()}` : ''} readOnly /></Field>
-          <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="btn-primary" onClick={addHouse} style={{ width: '100%', padding: '10px 0' }}>+ Add House</button></div>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="btn-primary" onClick={addHouse} style={{ width: '100%', minHeight: '38px' }}><Icon name="plus" size={16} /> Add House</button></div>
         </div>
       </div>
 
@@ -50,29 +52,43 @@ export default function HousesPage({ houses, apartments, onRefresh, toast }) {
         const apH = houses.filter(h => h.apartment === ap);
         if (!apH.length) return null;
         return (
-          <div key={ap} style={{ marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--accent-primary) 0%, #059669 100%)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>{ap}</div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-main)', letterSpacing: '0.02em' }}>Apartment {ap}</h3>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', padding: '2px 10px', borderRadius: 999 }}>{apH.length} unit{apH.length !== 1 ? 's' : ''}</span>
+          <div key={ap} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: '0.5rem', marginBottom: '0.25rem' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Apartment {ap}</h3>
+              <span className="tag tag-neutral" style={{ padding: '2px 8px', fontSize: '0.7rem' }}>{apH.length} unit{apH.length !== 1 ? 's' : ''}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {apH.map(h => (
                 <div className="house-card" key={h._id}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 44, height: 44, background: h.status === 'occupied' ? 'var(--danger-bg)' : 'var(--success-bg)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: `inset 0 0 0 1px ${h.status === 'occupied' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}` }}>
-                      {h.status === 'occupied' ? '🔒' : '🔑'}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ 
+                      width: 36, 
+                      height: 36, 
+                      background: h.status === 'occupied' ? 'var(--danger-soft)' : 'var(--success-soft)', 
+                      borderRadius: 'var(--radius)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      color: h.status === 'occupied' ? 'var(--danger)' : 'var(--success)',
+                      border: `1px solid ${h.status === 'occupied' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(22, 163, 74, 0.15)'}`
+                    }}>
+                      <Icon name={h.status === 'occupied' ? 'lock' : 'key'} size={16} />
                     </div>
                     <div>
-                      <p style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-main)', letterSpacing: '0.02em' }}>{h.houseNumber}</p>
-                      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{h.location} <span style={{ opacity: 0.5 }}>•</span> {h.bedrooms} bed{h.bedrooms > 1 ? 's' : ''}{h.tenant ? <span style={{ color: 'var(--accent-secondary)' }}> • {h.tenant.name}</span> : ''}</p>
+                      <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--ink)' }}>{h.houseNumber}</p>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 2 }}>
+                        {h.location} <span style={{ opacity: 0.5 }}>•</span> {h.bedrooms} Bed{h.bedrooms > 1 ? 's' : ''}
+                        {h.tenant ? <span style={{ color: 'var(--blue)' }}> • {h.tenant.name}</span> : ''}
+                      </p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--accent-primary)', textShadow: '0 0 10px rgba(16,185,129,0.2)' }}>KES {(h.rent || 0).toLocaleString()}/mo</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <p style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary)' }}>KES {(h.rent || 0).toLocaleString()}/mo</p>
                     <StatusPill status={h.status} />
                     {h.status === 'vacant' && (
-                      <button className="btn-sm" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.3)' }} onClick={() => setDelConfirm(h._id)}>🗑</button>
+                      <button className="btn-outline btn-danger btn-sm" style={{ padding: '0 8px', minHeight: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setDelConfirm(h._id)}>
+                        <Icon name="trash" size={14} />
+                      </button>
                     )}
                   </div>
                 </div>
@@ -81,7 +97,7 @@ export default function HousesPage({ houses, apartments, onRefresh, toast }) {
           </div>
         );
       })}
-      {!houses.length && <EmptyState icon="🏠" title="No houses yet" sub="Add your first house above" />}
+      {!houses.length && <EmptyState icon="home" title="No houses yet" sub="Add your first house above" />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { API, authHeader, safeFetch } from '../api';
 import Dashboard from './Dashboard';
 import HousesPage from './HousesPage';
@@ -254,9 +254,11 @@ export function EnhancedDashboard({ userData, onLogout }) {
 
             {error && (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--danger)' }}>
-                <span style={{ fontSize: '2rem' }}>⚠️</span>
-                <p style={{ marginTop: '1rem', fontWeight: 600 }}>{error}</p>
-                <button className="button button-primary" onClick={loadAll} style={{ marginTop: '1rem' }}>Retry Sync</button>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <Icon name="alertTriangle" size={40} className="text-danger" />
+                </div>
+                <p style={{ fontWeight: 600 }}>{error}</p>
+                <button className="btn-primary" onClick={loadAll} style={{ marginTop: '1rem' }}>Retry Sync</button>
               </div>
             )}
 
