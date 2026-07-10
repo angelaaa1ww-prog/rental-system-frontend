@@ -1,16 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { ParticleBackground } from '../components/ParticleEffects';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleAuthComponent, IPVerificationModal } from '../components/GoogleAuth';
 import { TermsAndPrivacyModal } from '../components/TermsModal';
-import { modernTheme } from '../theme-modern';
 
-const T = modernTheme;
+const ICONS = {
+  building: '<path d="M4 22V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v18"/><path d="M9 22v-6h6v6"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
+  key: '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m12 11 9-9M17 7l3 3M14 10l2 2"/>',
+  bell: '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  sun: '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>'
+};
+
+function Icon({ name, size = 18, label, className = '' }) {
+  const body = ICONS[name];
+  if (!body) return null;
+  return (
+    <svg
+      aria-hidden={label ? undefined : true}
+      aria-label={label}
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      dangerouslySetInnerHTML={{ __html: body }}
+    />
+  );
+}
+
+function cx(...parts) {
+  return parts.filter(Boolean).join(' ');
+}
+
+function IconButton({ icon, label, className = '', ...props }) {
+  return (
+    <button className={cx('icon-button', className)} aria-label={label} title={label} {...props}>
+      <Icon name={icon} size={18} />
+    </button>
+  );
+}
+
+function Button({ children, icon, tone = 'primary', className = '', ...props }) {
+  return (
+    <button className={cx('button', `button-${tone}`, className)} {...props}>
+      {icon && <Icon name={icon} size={17} />}
+      <span>{children}</span>
+    </button>
+  );
+}
+
+function ParticleField() {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 54 }, (_, index) => ({
+        id: index,
+        left: `${(index * 37) % 101}%`,
+        top: `${(index * 61) % 101}%`,
+        size: `${2 + (index % 5)}px`,
+        delay: `${(index % 11) * -0.7}s`,
+        duration: `${12 + (index % 7)}s`,
+        dx: `${((index % 9) - 4) * 10}px`,
+        dy: `${((index % 7) - 3) * 12}px`
+      })),
+    []
+  );
+
+  return (
+    <div className="particle-field" aria-hidden="true">
+      {particles.map((particle) => (
+        <span
+          key={particle.id}
+          style={{
+            '--x': particle.left,
+            '--y': particle.top,
+            '--s': particle.size,
+            '--delay': particle.delay,
+            '--duration': particle.duration,
+            '--dx': particle.dx,
+            '--dy': particle.dy
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function LoginPage({ onLoginSuccess }) {
   const [showTerms, setShowTerms] = useState(true);
   const [showIPVerification, setShowIPVerification] = useState(false);
   const [currentIP, setCurrentIP] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     const termsVersion = localStorage.getItem('termsAcceptedVersion');
@@ -41,316 +125,63 @@ export function LoginPage({ onLoginSuccess }) {
     onLoginSuccess(userData);
   };
 
+  const onTheme = () => {
+    const newDark = !dark;
+    setDark(newDark);
+    if (newDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  };
+
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        width: '100%',
-        background: T.colors.background.default,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
-      <ParticleBackground />
-
-      <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: '520px', padding: '2rem' }}>
-        {/* HEADER - Logo and Branding */}
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          {/* Animated Logo Box */}
-          <div
-            style={{
-              width: '90px',
-              height: '90px',
-              margin: '0 auto 1.75rem',
-              background: T.colors.gradients.primaryGradient,
-              borderRadius: T.borderRadius['3xl'],
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: T.shadows.neon,
-              animation: 'float-logo 3s ease-in-out infinite',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Inner glow */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: T.borderRadius['3xl'],
-                animation: 'pulse 2s ease-in-out infinite',
-              }}
-            />
-            <span style={{ fontSize: '3rem', position: 'relative', zIndex: 2 }}>🏢</span>
-          </div>
-
-          {/* Title */}
-          <h1
-            style={{
-              fontSize: T.typography.fontSize['4xl'],
-              fontWeight: T.typography.fontWeight.extrabold,
-              background: T.colors.gradients.primaryGradient,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              marginBottom: '0.75rem',
-              fontFamily: T.typography.fontFamilySecondary,
-              letterSpacing: '-0.5px',
-            }}
-          >
-            GIFTED HANDS
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            style={{
-              color: T.colors.text.secondary,
-              fontSize: '1.05rem',
-              fontWeight: 500,
-              letterSpacing: '0.3px',
-            }}
-          >
-            VENTURES
+    <main className="auth-screen">
+      <ParticleField />
+      <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" className="floating-theme" onClick={onTheme} />
+      <section className="auth-layout">
+        <div className="auth-story">
+          <span className="brand-mark large">
+            <Icon name="building" size={32} />
+          </span>
+          <p className="eyebrow">Gifted Hands Ventures</p>
+          <h1>Rental operations, rebuilt with a sharper pulse.</h1>
+          <p>
+            Clean records, live rent visibility, protected access, and a calmer command center for every house and tenant.
           </p>
+          <div className="auth-stats" aria-label="Security highlights">
+            <span><Icon name="shield" size={16} /> Google restricted</span>
+            <span><Icon name="key" size={16} /> IP policy gate</span>
+            <span><Icon name="bell" size={16} /> Login alerts ready</span>
+          </div>
         </div>
 
-        {/* MAIN CARD */}
-        <div
-          style={{
-            background: T.colors.dark.surface,
-            border: `1px solid ${T.colors.dark.border}`,
-            borderRadius: T.borderRadius['2xl'],
-            padding: '3rem 2.5rem',
-            boxShadow: T.shadows.xl,
-            backdropFilter: 'blur(10px)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Animated background glow - Top Right */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '-100px',
-              right: '-100px',
-              width: '400px',
-              height: '400px',
-              background: T.colors.gradients.primaryGradient,
-              borderRadius: '50%',
-              opacity: 0.08,
-              filter: 'blur(80px)',
-              pointerEvents: 'none',
-              animation: 'float-glow 6s ease-in-out infinite',
-            }}
-          />
-
-          {/* Animated background glow - Bottom Left */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-150px',
-              left: '-150px',
-              width: '350px',
-              height: '350px',
-              background: 'rgba(88, 129, 255, 0.1)',
-              borderRadius: '50%',
-              opacity: 0.05,
-              filter: 'blur(80px)',
-              pointerEvents: 'none',
-              animation: 'float-glow-reverse 8s ease-in-out infinite',
-            }}
-          />
-
-          {/* Content */}
-          <div style={{ position: 'relative', zIndex: 2 }}>
+        <div className="auth-card">
+          <div className="auth-form">
+            <span className="mini-mark">
+              <Icon name="key" size={22} />
+            </span>
+            <h2>Owner sign-in</h2>
+            <p>Access is limited to authorized users.</p>
+            
             {termsAccepted ? (
-              <>
-                {/* Welcome Text */}
-                <div style={{ marginBottom: '2.5rem' }}>
-                  <h2
-                    style={{
-                      fontSize: T.typography.fontSize['2xl'],
-                      fontWeight: T.typography.fontWeight.bold,
-                      marginBottom: '0.75rem',
-                      color: T.colors.text.primary,
-                      letterSpacing: '-0.3px',
-                    }}
-                  >
-                    Welcome Back
-                  </h2>
-
-                  <p
-                    style={{
-                      color: T.colors.text.secondary,
-                      fontSize: '0.95rem',
-                      lineHeight: '1.6',
-                      margin: 0,
-                    }}
-                  >
-                    Sign in with your Google account to access your rental management dashboard.
-                  </p>
-                </div>
-
-                {/* Google Auth Button */}
-                <div style={{ marginBottom: '2rem' }}>
-                  <GoogleAuthComponent onSuccess={handleGoogleSuccess} />
-                </div>
-
-                {/* Divider */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    marginBottom: '2rem',
-                    opacity: 0.5,
-                  }}
-                >
-                  <div style={{ flex: 1, height: '1px', background: T.colors.dark.border }} />
-                  <span style={{ color: T.colors.text.disabled, fontSize: '0.85rem' }}>or</span>
-                  <div style={{ flex: 1, height: '1px', background: T.colors.dark.border }} />
-                </div>
-
-                {/* Security Info Box */}
-                <div
-                  style={{
-                    padding: '1.25rem',
-                    background: `linear-gradient(135deg, ${T.colors.dark.bg} 0%, rgba(88, 129, 255, 0.05) 100%)`,
-                    border: `1px solid ${T.colors.dark.border}`,
-                    borderRadius: T.borderRadius.lg,
-                    display: 'flex',
-                    gap: '1rem',
-                  }}
-                >
-                  <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>🔐</span>
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontSize: '0.9rem',
-                        color: T.colors.text.secondary,
-                        margin: '0 0 0.25rem 0',
-                        fontWeight: 600,
-                      }}
-                    >
-                      Secure & Private
-                    </p>
-                    <p
-                      style={{
-                        fontSize: '0.8rem',
-                        color: T.colors.text.hint,
-                        margin: 0,
-                        lineHeight: '1.5',
-                      }}
-                    >
-                      Your data is encrypted. We verify new login locations for your protection.
-                    </p>
-                  </div>
-                </div>
-              </>
+              <div style={{ marginTop: '0.5rem' }}>
+                <GoogleAuthComponent onSuccess={handleGoogleSuccess} />
+              </div>
             ) : (
-              <>
-                {/* Terms Not Accepted */}
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚖️</div>
-                  <h3
-                    style={{
-                      color: T.colors.text.primary,
-                      fontSize: T.typography.fontSize.lg,
-                      marginBottom: '1rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    Terms & Privacy
-                  </h3>
-                  <p
-                    style={{
-                      color: T.colors.text.secondary,
-                      marginBottom: '2rem',
-                      lineHeight: '1.6',
-                    }}
-                  >
-                    Please read and accept our Terms of Use and Privacy Policy to continue.
-                  </p>
-                  <button
-                    onClick={() => setShowTerms(true)}
-                    style={{
-                      padding: '0.875rem 2rem',
-                      background: T.colors.gradients.primaryGradient,
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: T.borderRadius.lg,
-                      fontWeight: 700,
-                      fontSize: '0.95rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: T.shadows.lg,
-                      width: '100%',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = T.shadows.xl;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = T.shadows.lg;
-                    }}
-                  >
-                    View Terms & Privacy
-                  </button>
-                </div>
-              </>
+              <Button type="button" className="full-width" onClick={() => setShowTerms(true)}>
+                View Terms & Privacy
+              </Button>
             )}
+
+            <div className="legal-links" style={{ marginTop: '1rem' }}>
+              <button type="button" onClick={() => setShowTerms(true)}>Terms</button>
+              <button type="button" onClick={() => setShowTerms(true)}>Privacy</button>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Footer */}
-        <div
-          style={{
-            textAlign: 'center',
-            marginTop: '2.5rem',
-            padding: '1.5rem',
-            backgroundColor: 'rgba(88, 129, 255, 0.05)',
-            borderRadius: T.borderRadius.lg,
-            border: `1px solid ${T.colors.dark.border}`,
-          }}
-        >
-          <p style={{ color: T.colors.text.hint, fontSize: '0.8rem', margin: '0 0 0.5rem 0' }}>
-            By signing in, you agree to our{' '}
-            <button
-              onClick={() => setShowTerms(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: T.colors.primary[400],
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                fontWeight: 600,
-                fontSize: 'inherit',
-              }}
-            >
-              Terms & Privacy Policy
-            </button>
-          </p>
-          <p
-            style={{
-              textAlign: 'center',
-              marginTop: '2.5rem',
-              color: T.colors.text.hint,
-              fontSize: '0.8rem',
-              margin: '0 0 0.5rem 0',
-            }}
-          >
-            © 2026 GIFTED HANDS VENTURES. All rights reserved.
-          </p>
-        </div>
-      </div>
-
-      {/* Modals */}
       <TermsAndPrivacyModal isOpen={showTerms} onAccept={handleTermsAccept} />
       <IPVerificationModal
         isOpen={showIPVerification}
@@ -358,33 +189,6 @@ export function LoginPage({ onLoginSuccess }) {
         onVerify={handleIPVerify}
         onSkip={() => setShowIPVerification(false)}
       />
-
-      {/* Animations */}
-      <style>{`
-        @keyframes float-logo {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
-        }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.3; }
-        }
-
-        @keyframes float-glow {
-          0%, 100% { transform: translate(0, 0); }
-          25% { transform: translate(20px, -20px); }
-          50% { transform: translate(0, 30px); }
-          75% { transform: translate(-20px, -10px); }
-        }
-
-        @keyframes float-glow-reverse {
-          0%, 100% { transform: translate(0, 0); }
-          25% { transform: translate(-15px, 20px); }
-          50% { transform: translate(15px, -20px); }
-          75% { transform: translate(10px, 15px); }
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }
