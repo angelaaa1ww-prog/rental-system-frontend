@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react';
-
-const API = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
-
-const authHeader = () => {
-  const t = localStorage.getItem('token');
-  return t ? { Authorization: `Bearer ${t}` } : {};
-};
+import { API, authHeader } from '../api';
 
 export default function Dashboard({ onPageChange }) {
   const [data,       setData]       = useState(null);

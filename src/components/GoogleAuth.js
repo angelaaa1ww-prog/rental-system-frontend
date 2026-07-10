@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { modernTheme } from '../theme-modern';
+import { API, safeFetch } from '../api';
 
 const T = modernTheme;
 const DEFAULT_ALLOWED_EMAIL = 'isowekesa@gmail.com';
@@ -109,26 +110,40 @@ export function GoogleAuthComponent({ onSuccess }) {
         return;
       }
 
+      // Authenticate with the backend
+      const res = await safeFetch(`${API}/api/google-auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+
+      if (res?.__error || !res || !res.token) {
+        setError(res?.message || 'Access denied by backend server.');
+        setIsLoading(false);
+        return;
+      }
+
       // Store auth data
       const authData = {
         email: userData.email,
         name: userData.name,
         picture: userData.picture,
-        token: response.credential,
+        token: res.token,
         ipAddress: userIP,
         firstLoginIP: userIP,
         loginTimestamp: new Date().toISOString(),
         isNewIP: true,
       };
 
-      // Check if IP is new (would need backend verification)
+      // Check if IP is new
       const previousLogins = JSON.parse(localStorage.getItem('loginHistory') || '[]');
       const isNewIP = !previousLogins.some((login) => login.ipAddress === userIP);
 
       authData.isNewIP = isNewIP;
 
       // Store securely
-      localStorage.setItem('authToken', response.credential);
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('authToken', res.token);
       localStorage.setItem('userData', JSON.stringify(authData));
       localStorage.setItem('lastIP', userIP);
       previousLogins.push({

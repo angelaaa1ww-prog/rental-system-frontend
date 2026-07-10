@@ -1,4 +1,5 @@
-const API = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
+const rawApi = process.env.REACT_APP_API_URL || "https://rental-system-backend-1t05.onrender.com";
+const API = rawApi.endsWith('/api') ? rawApi.slice(0, -4) : rawApi;
 
 export const getToken = () => {
   const t = localStorage.getItem('token');

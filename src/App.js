@@ -43,6 +43,7 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
     localStorage.removeItem('userData');
     setIsAuthenticated(false);
     setUserData(null);
