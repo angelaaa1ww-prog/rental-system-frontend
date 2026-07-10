@@ -38,6 +38,16 @@
   --z-topbar: 30;
   --z-modal: 60;
   --z-toast: 70;
+
+  /* Legacy variable mappings for components compatibility */
+  --text-main: var(--ink);
+  --text-muted: var(--muted);
+  --border-color: var(--line);
+  --bg-card: var(--surface);
+  --accent-primary: var(--primary);
+  --accent-secondary: var(--blue);
+  --danger-bg: var(--danger-soft);
+  --success-bg: var(--success-soft);
 }
 
 :root[data-theme='dark'] {
