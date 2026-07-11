@@ -25,8 +25,10 @@ export function GoogleAuthComponent({ onSuccess }) {
       .catch(() => setUserIP('unknown'));
 
     if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+      // Provide a clearer, actionable message when client ID isn't provided at build time.
+      const msg = 'Google Sign-In is not configured. Set REACT_APP_GOOGLE_CLIENT_ID in your environment and rebuild the frontend.';
       console.error('REACT_APP_GOOGLE_CLIENT_ID is missing — check .env / Vercel env vars.');
-      setError('Google Sign-In is not configured. Missing client ID.');
+      setError(msg);
       setGoogleFailed(true);
       return;
     }
@@ -172,19 +174,28 @@ export function GoogleAuthComponent({ onSuccess }) {
 
       {/* Custom Fallback Button (shown only once Google is confirmed unavailable) */}
       {googleFailed && (
-        <button
-          className="btn-primary"
-          onClick={() => window.location.href = 'https://accounts.google.com/'}
-          style={{
-            width: '100%',
-            padding: '0.75rem 1.5rem',
-            fontSize: '0.95rem',
-            minHeight: '42px'
-          }}
-        >
-          <Icon name="key" size={16} />
-          Sign In with Google
-        </button>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <button
+            className="btn-primary"
+            onClick={() => window.open('https://accounts.google.com/', '_blank', 'noopener')}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1.5rem',
+              fontSize: '0.95rem',
+              minHeight: '42px'
+            }}
+          >
+            <Icon name="key" size={16} />
+            Sign In with Google (open in new tab)
+          </button>
+          <button
+            className="btn-ghost"
+            onClick={() => window.alert('To enable Google Sign-In: set REACT_APP_GOOGLE_CLIENT_ID in your build environment (e.g. Vercel env vars or .env) and rebuild the frontend. If you need help, check the README.')}
+            style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}
+          >
+            Troubleshoot / How to configure
+          </button>
+        </div>
       )}
 
       {error && (
