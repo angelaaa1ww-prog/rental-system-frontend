@@ -167,7 +167,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
 
   const navItems = [
     { id: 'overview', label: 'Dashboard', icon: 'barChart' },
-    { id: 'properties', label: 'Houses', icon: 'home' },
+    { id: 'properties', label: 'Properties', icon: 'home' },
     { id: 'tenants', label: 'Tenants', icon: 'users' },
     { id: 'payments', label: 'Payments', icon: 'creditCard' },
     { id: 'reports', label: 'Reports', icon: 'fileText' },
@@ -248,7 +248,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
             {loading && !dash && (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                 <span className="loader small" style={{ display: 'inline-block', marginBottom: '1rem' }} />
-                <p>Syncing Command Center...</p>
+                <p>Syncing your workspace...</p>
               </div>
             )}
 

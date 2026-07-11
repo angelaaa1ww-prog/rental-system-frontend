@@ -109,14 +109,14 @@ export function LoginPage({ onLoginSuccess }) {
             <Icon name="building" size={32} />
           </span>
           <p className="eyebrow">Gifted Hands Ventures</p>
-          <h1>Rental operations, rebuilt with a sharper pulse.</h1>
+          <h1>A clearer way to run your rental portfolio.</h1>
           <p>
-            Clean records, live rent visibility, protected access, and a calmer command center for every house and tenant.
+            Manage properties, tenant records, rent collection, and communication from a secure, focused workspace.
           </p>
           <div className="auth-stats" aria-label="Security highlights">
-            <span><Icon name="shield" size={16} /> Google restricted</span>
-            <span><Icon name="key" size={16} /> IP policy gate</span>
-            <span><Icon name="bell" size={16} /> Login alerts ready</span>
+            <span><Icon name="shield" size={16} /> Restricted access</span>
+            <span><Icon name="key" size={16} /> Location checks</span>
+            <span><Icon name="bell" size={16} /> Login security</span>
           </div>
         </div>
 
