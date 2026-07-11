@@ -177,13 +177,13 @@ export function EnhancedDashboard({ userData, onLogout }) {
   const current = navItems.find((item) => item.id === activeTab) || navItems[0];
 
   const renderPage = () => {
-    if (activeTab === 'overview') return <Dashboard onPageChange={handleNav} reminders={reminders} />;
+    if (activeTab === 'overview') return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} />;
     if (activeTab === 'properties') return <HousesPage houses={houses} apartments={['A', 'B', 'C', 'D']} onRefresh={loadAll} toast={toast} />;
     if (activeTab === 'tenants') return <TenantsPage tenants={tenants} houses={houses} balances={balances} onRefresh={loadAll} toast={toast} />;
     if (activeTab === 'payments') return <PaymentsPage payments={payments} />;
     if (activeTab === 'reports') return <ReportsPage toast={toast} />;
     if (activeTab === 'sms') return <SmsPage tenants={tenants} balances={balances} toast={toast} />;
-    return <Dashboard onPageChange={handleNav} />;
+    return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} />;
   };
 
   return (

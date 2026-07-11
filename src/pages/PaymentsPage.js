@@ -1,67 +1,46 @@
-import { Avatar, EmptyState } from '../components/ui';
+import { useMemo, useState } from 'react';
+import { Avatar, EmptyState, Icon } from '../components/ui';
+
+const PAGE_SIZE = 8;
+const currency = (value) => `KES ${(Number(value) || 0).toLocaleString()}`;
 
 export default function PaymentsPage({ payments }) {
+  const [query, setQuery] = useState('');
+  const [method, setMethod] = useState('all');
+  const [selected, setSelected] = useState(() => new Set());
+  const [page, setPage] = useState(1);
   const now = new Date();
-  const totalIncome = payments.reduce((s, p) => s + (p.amount || 0), 0);
-  const thisMonth = payments
-    .filter(p => { const d = new Date(p.createdAt); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); })
-    .reduce((s, p) => s + (p.amount || 0), 0);
+  const totalIncome = payments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+  const thisMonth = payments.filter((payment) => { const date = new Date(payment.createdAt); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
 
-  const stats = [
-    { label: 'Total Collected', value: `KES ${totalIncome.toLocaleString()}`, color: 'var(--primary)', bg: 'var(--primary-soft)' },
-    { label: 'Transactions', value: payments.length, color: 'var(--blue)', bg: 'var(--blue-soft)' },
-    { label: 'This Month', value: `KES ${thisMonth.toLocaleString()}`, color: 'var(--amber)', bg: 'var(--amber-soft)' },
-  ];
+  const filteredPayments = useMemo(() => payments.filter((payment) => {
+    const text = `${payment.tenant?.name || ''} ${payment.tenant?.phone || ''} ${payment.reference || ''}`.toLowerCase();
+    return text.includes(query.trim().toLowerCase()) && (method === 'all' || (payment.paymentMethod || 'cash').toLowerCase() === method);
+  }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [payments, query, method]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredPayments.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const visiblePayments = filteredPayments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const allVisibleSelected = visiblePayments.length > 0 && visiblePayments.every((payment) => selected.has(payment._id));
+  const togglePayment = (id) => setSelected((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const toggleVisible = () => setSelected((current) => { const next = new Set(current); if (allVisibleSelected) visiblePayments.forEach((payment) => next.delete(payment._id)); else visiblePayments.forEach((payment) => next.add(payment._id)); return next; });
 
   return (
-    <div className="page-stack" style={{ animation: 'fadeUp 0.3s ease' }}>
-      <div className="surface">
-        <div className="section-head" style={{ marginBottom: '1.25rem' }}>
-          <h2>All Payments</h2>
-          <span className="tag tag-neutral">{payments.length} records</span>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 16, marginBottom: 24 }}>
-          {stats.map(c => (
-            <div key={c.label} style={{ background: c.bg, borderRadius: 'var(--radius)', padding: '1.25rem', border: `1px solid ${c.color}20` }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{c.label}</p>
-              <p style={{ fontSize: '1.25rem', fontWeight: 700, color: c.color, margin: 0 }}>{c.value}</p>
-            </div>
-          ))}
-        </div>
+    <div className="page-stack animate-fade-up">
+      <header className="page-title-bar"><div className="page-title-copy"><p className="eyebrow">Transaction ledger</p><h2>Payments</h2><p>Review rental income, payment channels, and references with a clear audit trail.</p></div><span className="tag tag-success">{payments.length} records</span></header>
 
-        {payments.length ? (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>{['#', 'Tenant', 'Phone', 'Amount', 'Method', 'Reference', 'Date'].map(h => <th key={h}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {payments.map((p, i) => (
-                  <tr key={p._id}>
-                    <td><span style={{ color: 'var(--muted)', fontSize: 13 }}>{i + 1}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Avatar name={p.tenant?.name} size="sm" />
-                        <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{p.tenant?.name || 'Unknown'}</span>
-                      </div>
-                    </td>
-                    <td style={{ color: 'var(--muted)' }}>{p.tenant?.phone || '—'}</td>
-                    <td><span style={{ fontWeight: 600, color: 'var(--primary)' }}>KES {(p.amount || 0).toLocaleString()}</span></td>
-                    <td>
-                      <span className={`tag ${p.paymentMethod === 'mpesa' ? 'tag-success' : 'tag-neutral'}`} style={{ textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                        {p.paymentMethod || 'cash'}
-                      </span>
-                    </td>
-                    <td><span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', background: 'var(--bg-strong)', padding: '2px 6px', borderRadius: 4, color: 'var(--muted)' }}>{p.reference || '—'}</span></td>
-                    <td style={{ color: 'var(--muted)' }}>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : <EmptyState icon="creditCard" title="No payments yet" sub="Payments you record will appear here" />}
-      </div>
+      <section className="payment-summary-grid" aria-label="Payment summary">
+        <article className="summary-stat"><p>Total collected</p><strong style={{ color: 'var(--primary)' }}>{currency(totalIncome)}</strong></article>
+        <article className="summary-stat"><p>Transactions</p><strong>{payments.length}</strong></article>
+        <article className="summary-stat"><p>Collected this month</p><strong style={{ color: 'var(--success)' }}>{currency(thisMonth)}</strong></article>
+      </section>
+
+      <section className="surface">
+        <div className="section-head"><div><p className="eyebrow">Payment records</p><h2>All transactions</h2></div>{selected.size > 0 && <span className="tag tag-blue">{selected.size} selected</span>}</div>
+        <div className="toolbar" style={{ marginBottom: 16 }}><div className="search-field"><Icon name="search" size={16} /><input className="app-input" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search tenant, phone, or reference" aria-label="Search payments" /></div><div className="toolbar-group"><Icon name="filter" size={16} /><select className="app-select filter-select" value={method} onChange={(event) => { setMethod(event.target.value); setPage(1); }} aria-label="Filter payments by method"><option value="all">All methods</option><option value="mpesa">M-Pesa</option><option value="cash">Cash</option></select></div></div>
+
+        {filteredPayments.length ? <><div className="table-wrap"><table className="data-table"><caption className="sr-only">Payment transaction records</caption><thead><tr><th scope="col"><input type="checkbox" checked={allVisibleSelected} onChange={toggleVisible} aria-label="Select visible payments" /></th>{['Tenant', 'Phone', 'Amount', 'Method', 'Reference', 'Date'].map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead><tbody>{visiblePayments.map((payment) => <tr key={payment._id}><td><input type="checkbox" checked={selected.has(payment._id)} onChange={() => togglePayment(payment._id)} aria-label={`Select payment from ${payment.tenant?.name || 'unknown tenant'}`} /></td><td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Avatar name={payment.tenant?.name} size="sm" /><strong>{payment.tenant?.name || 'Unknown tenant'}</strong></div></td><td>{payment.tenant?.phone || '—'}</td><td><strong style={{ color: 'var(--success)' }}>{currency(payment.amount)}</strong></td><td><span className={`tag ${(payment.paymentMethod || 'cash').toLowerCase() === 'mpesa' ? 'tag-success' : 'tag-neutral'}`}>{payment.paymentMethod || 'cash'}</span></td><td><code style={{ color: 'var(--muted)', fontSize: '.72rem', fontFamily: 'var(--font-mono)' }}>{payment.reference || '—'}</code></td><td>{payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td></tr>)}</tbody></table></div><footer className="toolbar" style={{ marginTop: 14 }}><span style={{ color: 'var(--muted)', fontSize: '.75rem' }}>Showing {Math.min((currentPage - 1) * PAGE_SIZE + 1, filteredPayments.length)}–{Math.min(currentPage * PAGE_SIZE, filteredPayments.length)} of {filteredPayments.length}</span><div className="toolbar-group"><button className="btn-outline btn-sm" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</button><span style={{ color: 'var(--muted)', fontSize: '.75rem' }}>Page {currentPage} of {pageCount}</span><button className="btn-outline btn-sm" disabled={currentPage === pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Next</button></div></footer></> : <EmptyState icon="creditCard" title={payments.length ? 'No matching payments' : 'No payments yet'} sub={payments.length ? 'Try another search term or payment method.' : 'Payments you record will appear here.'} />}
+      </section>
     </div>
   );
 }
