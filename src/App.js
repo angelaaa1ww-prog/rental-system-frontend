@@ -10,14 +10,9 @@ function App() {
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-
     const token = localStorage.getItem('authToken');
     const storedUserData = localStorage.getItem('userData');
+
     if (token && storedUserData) {
       try {
         setUserData(JSON.parse(storedUserData));
@@ -28,6 +23,7 @@ function App() {
         localStorage.removeItem('userData');
       }
     }
+
     setSessionReady(true);
   }, []);
 

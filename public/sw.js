@@ -1,5 +1,5 @@
 const CACHE_NAME = 'ghv-rental-v3';
-const urlsToCache = ['/', '/index.html', '/manifest.json'];
+const urlsToCache = ['./', './index.html', './manifest.json'];
 
 // =============================================
 // INSTALL — cache essential files
@@ -31,16 +31,24 @@ self.addEventListener('activate', event => {
 // FETCH — serve from cache or network
 // =============================================
 self.addEventListener('fetch', event => {
-  // Skip non-GET and API requests — always fetch live
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/')) return;
+
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
+  if (requestUrl.pathname.includes('/api/')) return;
+
+  // Only fallback to the cached shell for navigation requests.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => response)
+        .catch(() => caches.match(new Request('./index.html')))
+    );
+    return;
+  }
 
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    }).catch(() => {
-      return caches.match('/index.html');
-    })
+    caches.match(event.request).then((response) => response || fetch(event.request))
   );
 });
 

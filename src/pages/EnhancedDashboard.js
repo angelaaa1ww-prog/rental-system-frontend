@@ -7,7 +7,6 @@ import PaymentsPage from './PaymentsPage';
 import ReportsPage from './ReportsPage';
 import SmsPage from './SmsPage';
 import { Icon as AppIcon } from '../components/ui';
-import { BrandLogo, BrandMark } from '../components/BrandLogo';
 
 function IconButton({ icon, label, className = '', onClick, ...props }) {
   return (

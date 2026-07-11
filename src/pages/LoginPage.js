@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { GoogleAuthComponent, IPVerificationModal } from '../components/GoogleAuth';
 import { TermsAndPrivacyModal } from '../components/TermsModal';
 import { Icon as AppIcon } from '../components/ui';
-import { BrandLogo, BrandMark } from '../components/BrandLogo';
 
 function cx(...parts) {
   return parts.filter(Boolean).join(' ');
