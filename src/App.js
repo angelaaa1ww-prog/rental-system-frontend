@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { LoginPage } from './pages/LoginPage';
 import { EnhancedDashboard } from './pages/EnhancedDashboard';
+import { LoadingScreen } from './components/BrandLogo';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    // Load script for Google Sign-In
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
 
-    // Check for existing auth
     const token = localStorage.getItem('authToken');
     const storedUserData = localStorage.getItem('userData');
     if (token && storedUserData) {
@@ -28,6 +28,7 @@ function App() {
         localStorage.removeItem('userData');
       }
     }
+    setSessionReady(true);
   }, []);
 
   const handleLoginSuccess = (authData) => {
@@ -45,11 +46,7 @@ function App() {
 
   return (
     <>
-      {!isAuthenticated ? (
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <EnhancedDashboard userData={userData} onLogout={handleLogout} />
-      )}
+      {!sessionReady ? <LoadingScreen /> : !isAuthenticated ? <LoginPage onLoginSuccess={handleLoginSuccess} /> : <EnhancedDashboard userData={userData} onLogout={handleLogout} />}
       <Analytics />
     </>
   );
