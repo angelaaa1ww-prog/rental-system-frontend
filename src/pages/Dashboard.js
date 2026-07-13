@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { API, authHeader } from '../api';
+import React from 'react';
 import { Icon as AppIcon } from '../components/ui';
 
 function Avatar({ name, size = 'sm' }) {
@@ -23,36 +22,22 @@ function getRevenueSeries(payments) {
   });
 }
 
-export default function Dashboard({ onPageChange, reminders = [], payments = [] }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const load = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-    try {
-      const response = await fetch(`${API}/api/dashboard`, { headers: authHeader() });
-      if (!response.ok) throw new Error('Failed to load dashboard summary');
-      setData(await response.json());
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  if (loading) {
+export default function Dashboard({
+  onPageChange,
+  reminders = [],
+  payments = [],
+  data,
+  loading = false,
+  error,
+  onRefresh,
+  refreshing = false
+}) {
+  if (loading && !data) {
     return <div className="page-stack"><div className="metric-grid">{[...Array(6)].map((_, index) => <span className="skeleton-tile" key={index} style={{ height: 132 }} />)}</div><div className="surface"><div className="skeleton-tile" style={{ height: 260, width: '100%' }} /></div></div>;
   }
 
-  if (error) {
-    return <div className="empty-state"><span className="empty-icon"><AppIcon name="alertTriangle" size={24} /></span><strong>Dashboard data could not be synced</strong><p>{error}</p><button className="btn-primary" onClick={() => load()}>Try again</button></div>;
+  if (error && !data) {
+    return <div className="empty-state"><span className="empty-icon"><AppIcon name="alertTriangle" size={24} /></span><strong>Dashboard data could not be synced</strong><p>{error}</p><button className="btn-primary" onClick={onRefresh}>Try again</button></div>;
   }
 
   if (!data) return null;
@@ -129,7 +114,7 @@ export default function Dashboard({ onPageChange, reminders = [], payments = [] 
       </section>
 
       <section className="surface">
-        <div className="section-head"><div><p className="eyebrow">Risk queue</p><h2>Overdue rent balances</h2></div><div className="action-row">{overdueCount > 0 && <span className="tag tag-danger">{overdueCount} pending</span>}<button onClick={() => load(true)} disabled={refreshing} className="btn-outline btn-sm"><AppIcon name="refresh" size={14} /> {refreshing ? 'Refreshing' : 'Refresh'}</button></div></div>
+        <div className="section-head"><div><p className="eyebrow">Risk queue</p><h2>Overdue rent balances</h2></div><div className="action-row">{overdueCount > 0 && <span className="tag tag-danger">{overdueCount} pending</span>}<button onClick={onRefresh} disabled={refreshing} className="btn-outline btn-sm"><AppIcon name="refresh" size={14} /> {refreshing ? 'Refreshing' : 'Refresh'}</button></div></div>
         {!data.overdueTenants?.length ? <div className="empty-state"><span className="empty-icon"><AppIcon name="checkCircle" size={22} /></span><strong>All accounts are current</strong><p>No overdue tenant payments are flagged right now.</p></div> : <div className="table-wrap"><table className="data-table"><caption className="sr-only">Overdue tenant rent balances</caption><thead><tr>{['Tenant', 'Phone', 'House', 'Rent', 'Paid', 'Balance'].map((header) => <th scope="col" key={header}>{header}</th>)}</tr></thead><tbody>{data.overdueTenants.map((tenant, index) => <tr key={`${tenant.name}-${index}`}><td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Avatar name={tenant.name} size="sm" /><strong>{tenant.name}</strong></div></td><td>{tenant.phone || '—'}</td><td><span className="tag tag-neutral">{tenant.house || '—'}</span></td><td>{currency(tenant.rent)}</td><td>{currency(tenant.paid)}</td><td><span className="tag tag-danger">{currency(tenant.balance)}</span></td></tr>)}</tbody></table></div>}
       </section>
     </div>

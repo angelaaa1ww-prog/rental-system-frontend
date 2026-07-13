@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { API, authHeader, safeFetch } from '../api';
 import Dashboard from './Dashboard';
 import HousesPage from './HousesPage';
@@ -28,12 +28,15 @@ function Avatar({ name, size = 'md' }) {
 }
 
 function useViewport() {
-  const [compact, setCompact] = useState(() => window.innerWidth < 980);
+  const getCompact = () => typeof window !== 'undefined' && window.innerWidth < 980;
+  const [compact, setCompact] = useState(getCompact);
+
   useEffect(() => {
-    const onResize = () => setCompact(window.innerWidth < 980);
+    const onResize = () => setCompact(getCompact());
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
   return compact;
 }
 
@@ -48,75 +51,96 @@ export function EnhancedDashboard({ userData, onLogout }) {
   const [balances, setBalances] = useState({});
   const [payments, setPayments] = useState([]);
   const [reminders, setReminders] = useState([]);
-  const [dash, setDash] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const [portfolioError, setPortfolioError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [toastType, setToastType] = useState('info'); // 'info', 'success', 'error'
+  const [toastType, setToastType] = useState('info');
+  const toastTimer = useRef(null);
 
-  const toast = useCallback((msg, type = 'info') => {
-    setToastMessage(msg);
+  const toast = useCallback((message, type = 'info') => {
+    window.clearTimeout(toastTimer.current);
+    setToastMessage(message);
     setToastType(type);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
+    toastTimer.current = window.setTimeout(() => setToastMessage(null), 4000);
   }, []);
 
-  const loadAll = async () => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  const loadDashboard = useCallback(async () => {
+    setDashboardLoading(true);
+
     try {
       const headers = authHeader();
-      const [houseData, tenantData, dashData, paymentData, reminderData] = await Promise.all([
-        safeFetch(`${API}/api/houses`, { headers }),
-        safeFetch(`${API}/api/tenants`, { headers }),
+      const [dashboardResponse, paymentResponse, reminderResponse] = await Promise.all([
         safeFetch(`${API}/api/dashboard`, { headers }),
         safeFetch(`${API}/api/payments`, { headers }),
         safeFetch(`${API}/api/sms/reminders`, { headers })
       ]);
 
-      if (houseData?.__error || tenantData?.__error || dashData?.__error) {
-        setError('Error loading data from server.');
-        setLoading(false);
-        return;
+      if (dashboardResponse?.__error || !dashboardResponse || typeof dashboardResponse !== 'object') {
+        setDashboardError(dashboardResponse?.message || 'Dashboard data could not be loaded.');
+      } else {
+        setDashboardData(dashboardResponse);
+        setDashboardError(null);
       }
 
-      const safeHouses = Array.isArray(houseData) ? houseData : [];
-      const safeTenants = Array.isArray(tenantData) ? tenantData : [];
-      setHouses(safeHouses);
-      setTenants(safeTenants);
-      setDash(dashData && typeof dashData === 'object' ? dashData : null);
-      setPayments(Array.isArray(paymentData) ? paymentData : []);
-      setReminders(Array.isArray(reminderData) ? reminderData : []);
-
-      // Fetch balances for each tenant
-      const balancePairs = await Promise.all(
-        safeTenants.map(async (tenant) => {
-          const balance = await safeFetch(`${API}/api/tenants/${tenant._id}/balance`, { headers });
-          return [tenant._id, balance || { rent: 0, paid: 0, balance: 0 }];
-        })
-      );
-      setBalances(Object.fromEntries(balancePairs));
-    } catch (err) {
-      console.error(err);
-      setError('Cannot connect to server.');
+      if (!paymentResponse?.__error) setPayments(Array.isArray(paymentResponse) ? paymentResponse : []);
+      if (!reminderResponse?.__error) setReminders(Array.isArray(reminderResponse) ? reminderResponse : []);
+    } catch (error) {
+      console.error('Dashboard load failed:', error);
+      setDashboardError('Dashboard data could not be loaded.');
     } finally {
-      setLoading(false);
+      setDashboardLoading(false);
     }
-  };
+  }, []);
+
+  const loadPortfolio = useCallback(async () => {
+    setPortfolioLoading(true);
+
+    try {
+      const headers = authHeader();
+      const [houseResponse, tenantResponse, balanceResponse] = await Promise.all([
+        safeFetch(`${API}/api/houses`, { headers }),
+        safeFetch(`${API}/api/tenants`, { headers }),
+        safeFetch(`${API}/api/payments/balances`, { headers })
+      ]);
+
+      const hasPropertyError = houseResponse?.__error || tenantResponse?.__error;
+      setPortfolioError(hasPropertyError ? 'Property records could not be fully loaded. Please refresh and try again.' : null);
+
+      if (!houseResponse?.__error) setHouses(Array.isArray(houseResponse) ? houseResponse : []);
+      if (!tenantResponse?.__error) setTenants(Array.isArray(tenantResponse) ? tenantResponse : []);
+      if (!balanceResponse?.__error && balanceResponse && typeof balanceResponse === 'object') {
+        setBalances(balanceResponse);
+      }
+    } catch (error) {
+      console.error('Portfolio load failed:', error);
+      setPortfolioError('Property records could not be loaded. Please refresh and try again.');
+    } finally {
+      setPortfolioLoading(false);
+    }
+  }, []);
+
+  const refreshWorkspace = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([loadDashboard(), loadPortfolio()]);
+    setRefreshing(false);
+  }, [loadDashboard, loadPortfolio]);
 
   useEffect(() => {
-    loadAll();
-  }, []);
+    loadDashboard();
+    loadPortfolio();
+  }, [loadDashboard, loadPortfolio]);
 
   const toggleTheme = () => {
     const newDark = !dark;
     setDark(newDark);
-    if (newDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
+    if (newDark) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
   };
 
   const handleNav = (tabId) => {
@@ -136,38 +160,39 @@ export function EnhancedDashboard({ userData, onLogout }) {
   const current = navItems.find((item) => item.id === activeTab) || navItems[0];
 
   const renderPage = () => {
-    if (activeTab === 'overview') return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} />;
-    if (activeTab === 'properties') return <HousesPage houses={houses} apartments={['A', 'B', 'C', 'D']} onRefresh={loadAll} toast={toast} />;
-    if (activeTab === 'tenants') return <TenantsPage tenants={tenants} houses={houses} balances={balances} onRefresh={loadAll} toast={toast} />;
+    if (activeTab === 'overview') {
+      return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} data={dashboardData} loading={dashboardLoading} error={dashboardError} onRefresh={loadDashboard} refreshing={dashboardLoading} />;
+    }
+    if (activeTab === 'properties') return <HousesPage houses={houses} apartments={['A', 'B', 'C', 'D', 'E']} loading={portfolioLoading} error={portfolioError} onRefresh={loadPortfolio} toast={toast} />;
+    if (activeTab === 'tenants') return <TenantsPage tenants={tenants} houses={houses} balances={balances} loading={portfolioLoading} error={portfolioError} onRefresh={loadPortfolio} toast={toast} />;
     if (activeTab === 'payments') return <PaymentsPage payments={payments} />;
     if (activeTab === 'reports') return <ReportsPage toast={toast} />;
     if (activeTab === 'sms') return <SmsPage tenants={tenants} balances={balances} toast={toast} />;
-    return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} />;
+    return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} data={dashboardData} loading={dashboardLoading} error={dashboardError} onRefresh={loadDashboard} refreshing={dashboardLoading} />;
   };
 
   return (
     <>
       <div className="app-shell">
         {compact && sidebar && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setSidebar(false)} />}
-        
-        {/* Sidebar */}
+
         <aside className={`sidebar ${sidebar ? 'open' : ''}`}>
           <div className="sidebar-brand">
             <span className="brand-mark"><AppIcon name="building" size={23} /></span>
             <div>
               <strong>Gifted Hands</strong>
-              <small>Rental OS</small>
+              <small>Owner workspace</small>
             </div>
           </div>
-          
+
           <div className="owner-chip">
-            <Avatar name={userData?.name || 'Admin'} size="sm" />
+            <Avatar name={userData?.name || 'Owner'} size="sm" />
             <div>
               <span>{userData?.name || 'Owner'}</span>
-              <small>{userData?.email || 'admin@rentals.co.ke'}</small>
+              <small>{userData?.email || 'Private owner access'}</small>
             </div>
           </div>
-          
+
           <nav className="nav-list" aria-label="Main navigation">
             {navItems.map((item) => (
               <button key={item.id} className={activeTab === item.id ? 'active' : ''} onClick={() => handleNav(item.id)}>
@@ -177,80 +202,44 @@ export function EnhancedDashboard({ userData, onLogout }) {
               </button>
             ))}
           </nav>
-          
+
           <button className="logout-button" onClick={onLogout}>
             <AppIcon name="logOut" size={18} />
             <span>Sign out</span>
           </button>
         </aside>
 
-        {/* Main Content Area */}
         <main className="main-area">
           <header className="topbar">
             <div className="topbar-left">
-              <IconButton icon="menu" label="Toggle navigation" onClick={() => setSidebar(!sidebar)} />
+              {compact && <IconButton icon="menu" label="Toggle navigation" onClick={() => setSidebar((open) => !open)} />}
               <div>
                 <h1><AppIcon name={current.icon} size={20} /> {current.label}</h1>
                 <p>{new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</p>
               </div>
             </div>
-            
+
             <div className="topbar-actions">
               {reminders.length > 0 && <span className="tag tag-warning"><AppIcon name="alertTriangle" size={13} /> {reminders.length}</span>}
-              <IconButton icon="refresh" label="Refresh data" onClick={loadAll} />
+              <IconButton icon="refresh" label={refreshing ? 'Refreshing workspace' : 'Refresh workspace'} onClick={refreshWorkspace} disabled={refreshing} />
               <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" onClick={toggleTheme} />
-              <Avatar name={userData?.name || 'Admin'} size="sm" />
+              <Avatar name={userData?.name || 'Owner'} size="sm" />
             </div>
           </header>
 
           <section className="page-content">
-            {loading && !dash && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                <span className="loader small" style={{ display: 'inline-block', marginBottom: '1rem' }} />
-                <p>Syncing your workspace...</p>
-              </div>
-            )}
-
-            {error && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--danger)' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <AppIcon name="alertTriangle" size={40} className="text-danger" />
-                </div>
-                <p style={{ fontWeight: 600 }}>{error}</p>
-                <button className="btn-primary" onClick={loadAll} style={{ marginTop: '1rem' }}>Retry Sync</button>
-              </div>
-            )}
-
-            {!loading && !error && renderPage()}
+            {renderPage()}
           </section>
 
-          {/* Footer Info */}
-          <footer
-            style={{
-              padding: '1.5rem 2rem',
-              borderTop: '1px solid var(--border-color)',
-              fontSize: '0.8rem',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem'
-            }}
-          >
-            <p style={{ margin: 0 }}>
-              GHV OS v3.1 • Session IP: <code>{userData?.ipAddress || 'unknown'}</code>
-            </p>
-            <p style={{ margin: 0 }}>
-              Last login: {userData?.loginTimestamp ? new Date(userData.loginTimestamp).toLocaleString('en-KE') : new Date().toLocaleString('en-KE')}
-            </p>
+          <footer className="app-footer">
+            <p>Gifted Hands Rental OS · Private owner workspace</p>
+            <p>Signed in as {userData?.email || 'Owner'}</p>
           </footer>
         </main>
       </div>
 
-      {/* Toast Alert overlay */}
       {toastMessage && (
-        <div className="toast-stack" role="status" aria-live="polite" style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999 }}>
+        <div className="toast-stack" role="status" aria-live="polite">
           <div className={`toast toast-${toastType}`}>
             <AppIcon name={toastType === 'success' ? 'checkCircle' : toastType === 'error' ? 'xCircle' : 'info'} size={18} />
             <span>{toastMessage}</span>
