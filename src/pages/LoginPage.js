@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleAuthComponent, IPVerificationModal } from '../components/GoogleAuth';
+import { GoogleAuthComponent } from '../components/GoogleAuth';
 import { TermsAndPrivacyModal } from '../components/TermsModal';
 import { Icon as AppIcon } from '../components/ui';
 
@@ -27,8 +27,6 @@ function Button({ children, icon, tone = 'primary', className = '', ...props }) 
 
 export function LoginPage({ onLoginSuccess }) {
   const [showTerms, setShowTerms] = useState(true);
-  const [showIPVerification, setShowIPVerification] = useState(false);
-  const [currentIP, setCurrentIP] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [dark, setDark] = useState(false);
 
@@ -46,19 +44,9 @@ export function LoginPage({ onLoginSuccess }) {
     setShowTerms(false);
   };
 
+  // Go directly to dashboard — IP verification removed
   const handleGoogleSuccess = (authData) => {
-    if (authData.isNewIP) {
-      setCurrentIP(authData.ipAddress);
-      setShowIPVerification(true);
-    } else {
-      onLoginSuccess(authData);
-    }
-  };
-
-  const handleIPVerify = (code) => {
-    setShowIPVerification(false);
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    onLoginSuccess(userData);
+    onLoginSuccess(authData);
   };
 
   const onTheme = () => {
@@ -76,8 +64,8 @@ export function LoginPage({ onLoginSuccess }) {
       <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" className="floating-theme" onClick={onTheme} />
       <section className="auth-layout">
         <div className="auth-story">
-          <span className="brand-mark large">
-            <AppIcon name="building" size={32} />
+          <span className="brand-mark large" style={{ fontSize: '1.8rem', fontWeight: 900, background: 'var(--primary)', color: '#fff', borderRadius: 16, width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-1px' }}>
+            GH
           </span>
           <p className="eyebrow">Gifted Hands Ventures</p>
           <h1>A clearer way to run your rental portfolio.</h1>
@@ -86,15 +74,15 @@ export function LoginPage({ onLoginSuccess }) {
           </p>
           <div className="auth-stats" aria-label="Security highlights">
             <span><AppIcon name="shield" size={16} /> Restricted access</span>
-            <span><AppIcon name="key" size={16} /> Location checks</span>
+            <span><AppIcon name="key" size={16} /> Secure sign-in</span>
             <span><AppIcon name="bell" size={16} /> Login security</span>
           </div>
         </div>
 
         <div className="auth-card">
           <div className="auth-form">
-            <span className="mini-mark">
-              <AppIcon name="key" size={22} />
+            <span className="mini-mark" style={{ fontSize: '1.1rem', fontWeight: 800, background: 'var(--primary)', color: '#fff', borderRadius: 10, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-0.5px' }}>
+              GH
             </span>
             <h2>Owner sign-in</h2>
             <p>Access is limited to authorized users.</p>
@@ -105,7 +93,7 @@ export function LoginPage({ onLoginSuccess }) {
               </div>
             ) : (
               <Button type="button" className="full-width" onClick={() => setShowTerms(true)}>
-                View Terms & Privacy
+                View Terms &amp; Privacy to continue
               </Button>
             )}
 
@@ -118,12 +106,6 @@ export function LoginPage({ onLoginSuccess }) {
       </section>
 
       <TermsAndPrivacyModal isOpen={showTerms} onAccept={handleTermsAccept} />
-      <IPVerificationModal
-        isOpen={showIPVerification}
-        currentIP={currentIP}
-        onVerify={handleIPVerify}
-        onSkip={() => setShowIPVerification(false)}
-      />
     </main>
   );
 }

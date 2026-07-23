@@ -1,7 +1,7 @@
 {
-  "short_name": "Rental OS",
-  "name": "Gifted Hands Rental OS",
-  "description": "Gifted Hands Ventures rental operations console",
+  "short_name": "GH Rental OS",
+  "name": "Gifted Hands Ventures – Rental OS",
+  "description": "Gifted Hands Ventures private rental management console",
   "icons": [
     {
       "src": "logo192.png",
@@ -18,7 +18,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#007F6D",
-  "background_color": "#F6FBF8",
+  "theme_color": "#5581FF",
+  "background_color": "#0F1117",
   "orientation": "portrait-primary"
 }

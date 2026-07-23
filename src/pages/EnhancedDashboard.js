@@ -178,7 +178,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
 
         <aside className={`sidebar ${sidebar ? 'open' : ''}`}>
           <div className="sidebar-brand">
-            <span className="brand-mark"><AppIcon name="building" size={23} /></span>
+            <span className="brand-mark" style={{ fontSize: '1rem', fontWeight: 900, background: 'var(--primary)', color: '#fff', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-0.5px', flexShrink: 0 }}>GH</span>
             <div>
               <strong>Gifted Hands</strong>
               <small>Owner workspace</small>
@@ -232,8 +232,8 @@ export function EnhancedDashboard({ userData, onLogout }) {
           </section>
 
           <footer className="app-footer">
-            <p>Gifted Hands Rental OS · Private owner workspace</p>
-            <p>Signed in as {userData?.email || 'Owner'}</p>
+            <p>Gifted Hands Ventures · Rental OS</p>
+            <p>Private owner workspace</p>
           </footer>
         </main>
       </div>

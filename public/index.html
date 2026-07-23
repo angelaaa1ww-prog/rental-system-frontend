@@ -2,21 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+
+    <!-- Favicon & Icons -->
     <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/logo512.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- Viewport & Theme -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#5581FF" />
-    <meta name="description" content="GIFTED HANDS VENTURES - Premium Management System" />
+
+    <!-- SEO Meta Tags -->
+    <title>Gifted Hands Ventures – Rental Management System</title>
+    <meta name="description" content="Gifted Hands Ventures private rental management system. Manage properties, tenants, rent collection, and SMS communication from a secure, focused workspace." />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="author" content="Gifted Hands Ventures" />
+    <link rel="canonical" href="https://giftedhands.vercel.app/" />
+
+    <!-- Open Graph (for Google Search preview & social sharing) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Gifted Hands Ventures" />
+    <meta property="og:title" content="Gifted Hands Ventures – Rental Management" />
+    <meta property="og:description" content="Private rental management platform for Gifted Hands Ventures. Manage properties, tenants, rent collection, and communication." />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+    <meta property="og:locale" content="en_KE" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Gifted Hands Ventures – Rental Management" />
+    <meta name="twitter:description" content="Private rental management platform for Gifted Hands Ventures." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/logo512.png" />
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>GIFTED HANDS VENTURES - Management</title>
-    <!-- Google Sign-In -->
+
+    <!-- Structured Data (JSON-LD) for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Gifted Hands Ventures Rental OS",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Private rental management system for Gifted Hands Ventures – manage properties, tenants, rent, and communication.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KES"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Gifted Hands Ventures",
+        "url": "https://giftedhands.vercel.app/"
+      }
+    }
+    </script>
+
+    <!-- Google Sign-In SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run PropertyFlow.</noscript>
+    <noscript>You need to enable JavaScript to run Gifted Hands Ventures Rental OS.</noscript>
     <div id="root"></div>
   </body>
 </html>

@@ -13,25 +13,22 @@ const GOOGLE_POLL_INTERVAL_MS = 200;
 export function GoogleAuthComponent({ onSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userIP, setUserIP] = useState(null);
   const [googleFailed, setGoogleFailed] = useState(false);
   const googleButtonRef = useRef(null);
+  // Guard flag: ensures Google is only initialized once per mount
+  const initialized = useRef(false);
 
   useEffect(() => {
-    // Fetch user IP address
-    fetch('https://api.ipify.org?format=json')
-      .then((res) => res.json())
-      .then((data) => setUserIP(data.ip))
-      .catch(() => setUserIP('unknown'));
-
     if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
-      // Provide a clearer, actionable message when client ID isn't provided at build time.
       const msg = 'Google Sign-In is not configured. Set REACT_APP_GOOGLE_CLIENT_ID in your environment and rebuild the frontend.';
       console.error('REACT_APP_GOOGLE_CLIENT_ID is missing — check .env / Vercel env vars.');
       setError(msg);
       setGoogleFailed(true);
       return;
     }
+
+    // Prevent double initialization (important even without StrictMode)
+    if (initialized.current) return;
 
     let cancelled = false;
     let elapsed = 0;
@@ -40,6 +37,9 @@ export function GoogleAuthComponent({ onSuccess }) {
       if (cancelled) return;
 
       if (window.google && window.google.accounts && window.google.accounts.id) {
+        if (initialized.current) return; // double-check guard
+        initialized.current = true;
+
         try {
           window.google.accounts.id.initialize({
             client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
@@ -122,35 +122,27 @@ export function GoogleAuthComponent({ onSuccess }) {
         return;
       }
 
-      // Store auth data
+      // Build auth data (IP info kept internally but not displayed)
+      const loginTimestamp = new Date().toISOString();
       const authData = {
         email: userData.email,
         name: userData.name,
         picture: userData.picture,
         token: res.token,
-        ipAddress: userIP,
-        firstLoginIP: userIP,
-        loginTimestamp: new Date().toISOString(),
-        isNewIP: true,
+        loginTimestamp,
       };
 
-      // Check if IP is new
-      const previousLogins = JSON.parse(localStorage.getItem('loginHistory') || '[]');
-      const isNewIP = !previousLogins.some((login) => login.ipAddress === userIP);
-
-      authData.isNewIP = isNewIP;
-
-      // Store securely
+      // Store auth data securely
       localStorage.setItem('token', res.token);
       localStorage.setItem('authToken', res.token);
       localStorage.setItem('userData', JSON.stringify(authData));
-      localStorage.setItem('lastIP', userIP);
-      previousLogins.push({
-        timestamp: authData.loginTimestamp,
-        ipAddress: userIP,
-      });
+
+      // Maintain login history (internal only, not displayed)
+      const previousLogins = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+      previousLogins.push({ timestamp: loginTimestamp });
       localStorage.setItem('loginHistory', JSON.stringify(previousLogins.slice(-10)));
 
+      // Go directly to dashboard — no IP modal
       onSuccess(authData);
     } catch (err) {
       setError('Authentication failed. Please try again.');
@@ -231,88 +223,18 @@ export function GoogleAuthComponent({ onSuccess }) {
           Verifying your credentials...
         </div>
       )}
-
-      {userIP && (
-        <p style={{ fontSize: '0.75rem', color: 'var(--subtle)', marginTop: '0.5rem', margin: 0 }}>
-          Your IP: {userIP}
-        </p>
-      )}
     </div>
   );
 }
 
-export function IPVerificationModal({ isOpen, currentIP, onVerify, onSkip }) {
-  // In development, auto-skip IP verification after 1.5 seconds
+// IPVerificationModal kept for API compatibility but auto-skips immediately
+export function IPVerificationModal({ isOpen, onSkip }) {
   useEffect(() => {
-    if (isOpen && process.env.REACT_APP_ENV === 'development') {
-      const timer = setTimeout(() => {
-        onSkip();
-      }, 1500);
-      return () => clearTimeout(timer);
+    if (isOpen) {
+      // Auto-skip immediately — no IP verification required
+      onSkip();
     }
   }, [isOpen, onSkip]);
 
-  if (!isOpen) return null;
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        backdropFilter: 'blur(4px)',
-      }}
-    >
-      <div
-        style={{
-          background: 'var(--surface)',
-          borderRadius: 'var(--radius)',
-          border: '1px solid var(--line)',
-          padding: '2rem',
-          maxWidth: '460px',
-          width: '90%',
-          boxShadow: 'var(--shadow-lg)',
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem'
-        }}
-      >
-        <div style={{ color: 'var(--success)' }}>
-          <Icon name="checkCircle" size={48} />
-        </div>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--ink)', margin: 0 }}>
-          Verifying Your Login
-        </h2>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
-          New location detected: <strong>{currentIP}</strong>
-        </p>
-        <p style={{ color: 'var(--subtle)', fontSize: '0.8rem', margin: 0 }}>
-          Auto-verifying in development mode...
-        </p>
-
-        <div style={{ display: 'flex', width: '100%', gap: '0.5rem', marginTop: '0.5rem' }}>
-          <button
-            className="btn-primary"
-            onClick={() => onSkip()}
-            style={{ flex: 1, padding: '0.6rem' }}
-          >
-            Continue Now
-          </button>
-        </div>
-
-        <p style={{ color: 'var(--subtle)', fontSize: '0.7rem', margin: 0, marginTop: '0.5rem' }}>
-          In production, verification codes will be sent to your email.
-        </p>
-      </div>
-    </div>
-  );
+  return null;
 }

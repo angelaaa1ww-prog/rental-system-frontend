@@ -2,6 +2,80 @@ import React, { useMemo, useState } from 'react';
 import { API, authHeader, safeFetch } from '../api';
 import { Avatar, Field, MiniStat, EmptyState, ConfirmModal, Icon } from '../components/ui';
 
+// ─── Inline Edit Tenant Modal ───────────────────────────────────────────────
+function EditTenantModal({ tenant, onClose, onSaved, toast }) {
+  const [name, setName] = useState(tenant.name || '');
+  const [phone, setPhone] = useState(tenant.phone || '');
+  const [idNumber, setIdNumber] = useState(tenant.idNumber || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!name || !phone) {
+      toast('Name and phone number are required', 'error');
+      return;
+    }
+    setSaving(true);
+    const result = await safeFetch(`${API}/api/tenants/${tenant._id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeader() },
+      body: JSON.stringify({ name: name.trim(), phone: phone.trim(), idNumber: idNumber.trim() })
+    });
+    setSaving(false);
+    if (result?.__error) {
+      toast(result.message, 'error');
+      return;
+    }
+    if (result) {
+      toast('Tenant updated successfully', 'success');
+      onSaved();
+      onClose();
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 1000, backdropFilter: 'blur(4px)', padding: '1rem'
+    }}>
+      <div style={{
+        background: 'var(--surface)', borderRadius: 'var(--radius)',
+        border: '1px solid var(--line)', padding: '1.75rem',
+        maxWidth: 480, width: '100%', boxShadow: 'var(--shadow-lg)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div>
+            <p style={{ fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--muted)', marginBottom: 2 }}>Edit resident</p>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Tenant: {tenant.name}</h3>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 4 }}>
+            <Icon name="x" size={20} />
+          </button>
+        </div>
+        <form className="form-grid" onSubmit={handleSave}>
+          <Field label="Full name" required>
+            <input className="app-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. John Kamau" />
+          </Field>
+          <Field label="Phone number" required>
+            <input className="app-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="e.g. 0712 345 678" />
+          </Field>
+          <Field label="National ID" hint="Optional">
+            <input className="app-input" value={idNumber} onChange={e => setIdNumber(e.target.value)} placeholder="ID number" />
+          </Field>
+          <div className="form-action" style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+            <button type="button" className="btn-outline btn-sm" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Saving…' : <><Icon name="check" size={15} /> Save changes</>}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main TenantsPage ────────────────────────────────────────────────────────
 export default function TenantsPage({ tenants, houses, balances, onRefresh, toast }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -14,6 +88,7 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
   const [vacateConfirm, setVacateConfirm] = useState(null);
   const [c2bConfig, setC2bConfig] = useState(null);
   const [c2bLoading, setC2bLoading] = useState(true);
+  const [editTenant, setEditTenant] = useState(null);
 
   const addTenant = async () => {
     if (!name || !phone) { toast('Name and phone number are required', 'error'); return; }
@@ -85,6 +160,15 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
       <ConfirmModal open={!!delConfirm} title="Delete tenant?" message="This permanently removes the tenant and frees their house. This action cannot be undone." danger onConfirm={() => deleteTenant(delConfirm)} onCancel={() => setDelConfirm(null)} />
       <ConfirmModal open={!!vacateConfirm} title="Vacate tenant?" message="This removes the tenant from their house and marks the unit as vacant. The tenant record is kept." onConfirm={() => vacateTenant(vacateConfirm)} onCancel={() => setVacateConfirm(null)} />
 
+      {editTenant && (
+        <EditTenantModal
+          tenant={editTenant}
+          onClose={() => setEditTenant(null)}
+          onSaved={onRefresh}
+          toast={toast}
+        />
+      )}
+
       <header className="page-title-bar"><div className="page-title-copy"><p className="eyebrow">Resident directory</p><h2>Tenants</h2><p>Manage occupancy, rent balances, and tenant communication from one record.</p></div><span className="tag tag-neutral">{assignedCount} currently housed</span></header>
 
       <section className="surface">
@@ -107,7 +191,27 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
           return <article className="tenant-card" key={tenant._id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><Avatar name={tenant.name} /><div><strong style={{ display: 'block', fontSize: '.94rem' }}>{tenant.name}</strong><span style={{ display: 'block', marginTop: 2, color: 'var(--muted)', fontSize: '.76rem' }}>{tenant.phone}{tenant.idNumber ? ` · ID ${tenant.idNumber}` : ''}</span></div></div>
-              <div className="action-row">{assignedHouse ? <><span className="tag tag-success"><Icon name="home" size={12} /> {assignedHouse.houseNumber}</span><button className="btn-outline btn-sm" style={{ color: 'var(--amber)', borderColor: 'var(--amber)' }} onClick={() => setVacateConfirm(tenant._id)}>Vacate</button></> : <select className="app-select" style={{ minHeight: 32, minWidth: 180, fontSize: '.76rem' }} defaultValue="" onChange={(event) => assignHouse(tenant._id, event.target.value)} aria-label={`Assign a house to ${tenant.name}`}><option value="">Assign house</option>{houses.filter((house) => house.status === 'vacant').map((house) => <option key={house._id} value={house._id}>{house.houseNumber} — KES {(house.rent || 0).toLocaleString()}</option>)}</select>}<button className="btn-outline btn-danger btn-sm" aria-label={`Delete tenant ${tenant.name}`} onClick={() => setDelConfirm(tenant._id)}><Icon name="trash" size={14} /></button></div>
+              <div className="action-row">
+                {assignedHouse ? <><span className="tag tag-success"><Icon name="home" size={12} /> {assignedHouse.houseNumber}</span><button className="btn-outline btn-sm" style={{ color: 'var(--amber)', borderColor: 'var(--amber)' }} onClick={() => setVacateConfirm(tenant._id)}>Vacate</button></> : <select className="app-select" style={{ minHeight: 32, minWidth: 180, fontSize: '.76rem' }} defaultValue="" onChange={(event) => assignHouse(tenant._id, event.target.value)} aria-label={`Assign a house to ${tenant.name}`}><option value="">Assign house</option>{houses.filter((house) => house.status === 'vacant').map((house) => <option key={house._id} value={house._id}>{house.houseNumber} — KES {(house.rent || 0).toLocaleString()}</option>)}</select>}
+                {/* Edit Tenant Button */}
+                <button
+                  className="btn-outline btn-sm"
+                  aria-label={`Edit tenant ${tenant.name}`}
+                  onClick={() => setEditTenant(tenant)}
+                  title="Edit tenant details"
+                >
+                  <Icon name="edit" size={14} />
+                </button>
+                {/* Delete Tenant Button */}
+                <button
+                  className="btn-outline btn-danger btn-sm"
+                  aria-label={`Delete tenant ${tenant.name}`}
+                  onClick={() => setDelConfirm(tenant._id)}
+                  title="Delete tenant"
+                >
+                  <Icon name="trash" size={14} />
+                </button>
+              </div>
             </div>
 
             {assignedHouse && <div className="tenant-summary"><MiniStat label="Monthly rent" value={`KES ${(balance.rent || 0).toLocaleString()}`} color="var(--ink)" /><MiniStat label="Paid this month" value={`KES ${(balance.paid || 0).toLocaleString()}`} color="var(--success)" /><MiniStat label="Balance due" value={`KES ${(balance.balance || 0).toLocaleString()}`} color={balance.balance > 0 ? 'var(--danger)' : 'var(--success)'} /><div style={{ gridColumn: '1 / -1' }}><div className="progress"><span style={{ width: `${percentage}%`, background: percentage === 100 ? 'var(--success)' : percentage >= 50 ? 'var(--amber)' : 'var(--danger)' }} /></div><p style={{ marginTop: 6, color: 'var(--muted)', fontSize: '.7rem', textAlign: 'right' }}>{percentage}% of rent received</p></div></div>}
