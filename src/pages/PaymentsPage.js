@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { API, safeFetch, authHeader } from '../api';
+import { API, safeFetch } from '../api';
 import { Avatar, EmptyState, Icon } from '../components/ui';
 
 const PAGE_SIZE = 8;
@@ -12,11 +12,38 @@ export default function PaymentsPage({ payments }) {
   const [page, setPage] = useState(1);
   const [c2bConfig, setC2bConfig] = useState(null);
 
+  // Simulation modal state
+  const [showSimModal, setShowSimModal] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const [simHouse, setSimHouse] = useState('');
+  const [simAmount, setSimAmount] = useState('1000');
+  const [simResult, setSimResult] = useState(null);
+
   useEffect(() => {
     safeFetch(`${API}/api/c2b/config`).then((res) => {
       if (res && !res.__error) setC2bConfig(res);
     });
   }, []);
+
+  const handleSimulate = async (e) => {
+    e.preventDefault();
+    setSimulating(true);
+    setSimResult(null);
+    try {
+      const ref = simHouse.trim() ? `1183070#${simHouse.trim()}` : '';
+      const url = `${API}/api/c2b/simulate?amount=${simAmount}&billRefNumber=${encodeURIComponent(ref)}`;
+      const res = await safeFetch(url);
+      if (res && !res.__error && res.response?.ResponseCode === "0") {
+        setSimResult({ type: 'success', msg: `✅ M-Pesa Payment of KES ${Number(simAmount).toLocaleString()} simulated! Check ledger below.` });
+      } else {
+        setSimResult({ type: 'error', msg: res?.message || res?.error || 'Simulation request completed with notice' });
+      }
+    } catch (err) {
+      setSimResult({ type: 'error', msg: err.message });
+    } finally {
+      setSimulating(false);
+    }
+  };
 
   const now = new Date();
   const totalIncome = payments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
@@ -45,7 +72,12 @@ export default function PaymentsPage({ payments }) {
           <h2>Payments</h2>
           <p>Review automated M-Pesa C2B PayBill payments and manual entries with real-time tracking.</p>
         </div>
-        <span className="tag tag-success">{payments.length} records</span>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button className="btn-outline btn-sm" onClick={() => setShowSimModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Icon name="play" size={14} /> Simulate M-Pesa Payment
+          </button>
+          <span className="tag tag-success">{payments.length} records</span>
+        </div>
       </header>
 
       {/* C2B PayBill Status Banner */}
@@ -65,6 +97,9 @@ export default function PaymentsPage({ payments }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="btn-primary btn-sm" onClick={() => setShowSimModal(true)}>
+              🧪 Test PayBill Simulation
+            </button>
             <span className="tag tag-success"><Icon name="checkCircle" size={12} /> Auto-Reflect Active</span>
             <span className="tag tag-neutral"><Icon name="shield" size={12} /> Hash Token Secured</span>
           </div>
@@ -83,6 +118,46 @@ export default function PaymentsPage({ payments }) {
 
         {filteredPayments.length ? <><div className="table-wrap"><table className="data-table"><caption className="sr-only">Payment transaction records</caption><thead><tr><th scope="col"><input type="checkbox" checked={allVisibleSelected} onChange={toggleVisible} aria-label="Select visible payments" /></th>{['Tenant', 'House', 'Phone', 'Amount', 'Method', 'Reference', 'Date'].map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead><tbody>{visiblePayments.map((payment) => <tr key={payment._id}><td><input type="checkbox" checked={selected.has(payment._id)} onChange={() => togglePayment(payment._id)} aria-label={`Select payment from ${payment.tenant?.name || 'unknown tenant'}`} /></td><td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Avatar name={payment.tenant?.name} size="sm" /><strong>{payment.tenant?.name || 'Unknown tenant'}</strong></div></td><td><span className="tag tag-blue" style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{payment.tenant?.house?.houseNumber ? `House ${payment.tenant.house.houseNumber}` : (payment.billRefNumber ? `Ref: ${payment.billRefNumber}` : '—')}</span></td><td>{payment.tenant?.phone || '—'}</td><td><strong style={{ color: 'var(--success)' }}>{currency(payment.amount)}</strong></td><td><span className={`tag ${(payment.paymentMethod || 'cash').toLowerCase() === 'mpesa' ? 'tag-success' : 'tag-neutral'}`}>{payment.paymentMethod || 'cash'}</span></td><td><code style={{ color: 'var(--muted)', fontSize: '.72rem', fontFamily: 'var(--font-mono)' }}>{payment.reference || '—'}</code></td><td>{payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td></tr>)}</tbody></table></div><footer className="toolbar" style={{ marginTop: 14 }}><span style={{ color: 'var(--muted)', fontSize: '.75rem' }}>Showing {Math.min((currentPage - 1) * PAGE_SIZE + 1, filteredPayments.length)}–{Math.min(currentPage * PAGE_SIZE, filteredPayments.length)} of {filteredPayments.length}</span><div className="toolbar-group"><button className="btn-outline btn-sm" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</button><span style={{ color: 'var(--muted)', fontSize: '.75rem' }}>Page {currentPage} of {pageCount}</span><button className="btn-outline btn-sm" disabled={currentPage === pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Next</button></div></footer></> : <EmptyState icon="creditCard" title={payments.length ? 'No matching payments' : 'No payments yet'} sub={payments.length ? 'Try another search term or payment method.' : 'Payments you record will appear here.'} />}
       </section>
+
+      {/* Built-in M-Pesa C2B Simulation Modal */}
+      {showSimModal && (
+        <div className="modal-backdrop" onClick={() => setShowSimModal(false)}>
+          <div className="modal-content animate-fade-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
+            <header className="modal-header">
+              <h3>🧪 Simulate M-Pesa C2B Payment</h3>
+              <button className="icon-button" onClick={() => setShowSimModal(false)}><Icon name="x" size={18} /></button>
+            </header>
+            <form onSubmit={handleSimulate} style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '16px 0' }}>
+              <p style={{ fontSize: '.84rem', color: 'var(--muted)', margin: 0 }}>
+                Triggers a simulated Safaricom C2B PayBill transaction. The system matches the house number and links the payment automatically.
+              </p>
+              
+              {simResult && (
+                <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: '.84rem', background: simResult.type === 'success' ? 'var(--success-soft)' : 'var(--danger-soft)', color: simResult.type === 'success' ? 'var(--success)' : 'var(--danger)' }}>
+                  {simResult.msg}
+                </div>
+              )}
+
+              <div>
+                <label style={{ fontSize: '.8rem', fontWeight: 600, display: 'block', marginBottom: 4 }}>House Number (Optional)</label>
+                <input className="app-input" value={simHouse} onChange={(e) => setSimHouse(e.target.value)} placeholder="e.g. A101 (Leave empty for auto-match)" />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '.8rem', fontWeight: 600, display: 'block', marginBottom: 4 }}>Amount (KES)</label>
+                <input className="app-input" type="number" value={simAmount} onChange={(e) => setSimAmount(e.target.value)} required min="1" />
+              </div>
+
+              <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                <button type="button" className="btn-outline" onClick={() => setShowSimModal(false)}>Close</button>
+                <button type="submit" className="btn-primary" disabled={simulating}>
+                  {simulating ? 'Processing...' : '⚡ Send Test Payment'}
+                </button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
