@@ -53,7 +53,7 @@ function EditHouseModal({ house, onClose, onSaved, toast }) {
             <Icon name="x" size={20} />
           </button>
         </div>
-        <form className="form-grid" onSubmit={handleSave}>
+        <form className="form-grid form-grid-modal" onSubmit={handleSave}>
           <Field label="House number" required>
             <input className="app-input" value={houseNumber} onChange={e => setHouseNumber(e.target.value)} placeholder="e.g. A101" />
           </Field>
@@ -181,7 +181,7 @@ export default function HousesPage({ houses, apartments, onRefresh, toast }) {
 
       <section className="surface">
         <div className="section-head"><div><p className="eyebrow">New property</p><h2>Add a house</h2></div><span className="tag tag-success">{occupiedCount} occupied</span></div>
-        <form className="form-grid" onSubmit={(event) => { event.preventDefault(); addHouse(); }}>
+        <form className="form-grid form-grid-houses" onSubmit={(event) => { event.preventDefault(); addHouse(); }}>
           <Field label="House number" required><input className="app-input" placeholder="e.g. A101" value={houseNumber} onChange={(event) => setHouseNumber(event.target.value)} /></Field>
           <Field label="Location" required><input className="app-input" placeholder="e.g. Kiambu Road" value={location} onChange={(event) => setLocation(event.target.value)} /></Field>
           <Field label="Apartment"><select className="app-select" value={apartment} onChange={(event) => setApartment(event.target.value)}>{apartments.map((item) => <option key={item} value={item}>Apartment {item}</option>)}</select></Field>

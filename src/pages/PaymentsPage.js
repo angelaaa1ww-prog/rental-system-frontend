@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { API, safeFetch, authHeader } from '../api';
 import { Avatar, EmptyState, Icon } from '../components/ui';
 
 const PAGE_SIZE = 8;
@@ -9,9 +10,20 @@ export default function PaymentsPage({ payments }) {
   const [method, setMethod] = useState('all');
   const [selected, setSelected] = useState(() => new Set());
   const [page, setPage] = useState(1);
+  const [c2bConfig, setC2bConfig] = useState(null);
+
+  useEffect(() => {
+    safeFetch(`${API}/api/c2b/config`).then((res) => {
+      if (res && !res.__error) setC2bConfig(res);
+    });
+  }, []);
+
   const now = new Date();
   const totalIncome = payments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
-  const thisMonth = payments.filter((payment) => { const date = new Date(payment.createdAt); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+  const thisMonth = payments.filter((payment) => {
+    const date = new Date(payment.createdAt);
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
 
   const filteredPayments = useMemo(() => payments.filter((payment) => {
     const text = `${payment.tenant?.name || ''} ${payment.tenant?.phone || ''} ${payment.reference || ''}`.toLowerCase();
@@ -27,7 +39,37 @@ export default function PaymentsPage({ payments }) {
 
   return (
     <div className="page-stack animate-fade-up">
-      <header className="page-title-bar"><div className="page-title-copy"><p className="eyebrow">Transaction ledger</p><h2>Payments</h2><p>Review rental income, payment channels, and references with a clear audit trail.</p></div><span className="tag tag-success">{payments.length} records</span></header>
+      <header className="page-title-bar">
+        <div className="page-title-copy">
+          <p className="eyebrow">Transaction ledger</p>
+          <h2>Payments</h2>
+          <p>Review automated M-Pesa C2B PayBill payments and manual entries with real-time tracking.</p>
+        </div>
+        <span className="tag tag-success">{payments.length} records</span>
+      </header>
+
+      {/* C2B PayBill Status Banner */}
+      <section className="surface" style={{ background: 'var(--surface-soft)', borderLeft: '4px solid var(--primary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--primary-soft)', color: 'var(--primary)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <Icon name="creditCard" size={22} />
+            </div>
+            <div>
+              <strong style={{ fontSize: '.92rem', display: 'block', color: 'var(--ink)' }}>
+                M-Pesa C2B PayBill Active · {c2bConfig?.payBillNumber || '174379'}
+              </strong>
+              <span style={{ fontSize: '.76rem', color: 'var(--muted)' }}>
+                Account Reference Identifier: <strong>House Number (e.g. A101) or House ID</strong> · Hash System Protected
+              </span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span className="tag tag-success"><Icon name="checkCircle" size={12} /> Auto-Reflect Active</span>
+            <span className="tag tag-neutral"><Icon name="shield" size={12} /> Hash Token Secured</span>
+          </div>
+        </div>
+      </section>
 
       <section className="payment-summary-grid" aria-label="Payment summary">
         <article className="summary-stat"><p>Total collected</p><strong style={{ color: 'var(--primary)' }}>{currency(totalIncome)}</strong></article>

@@ -2,11 +2,20 @@ import React, { useEffect, useState, useRef } from 'react';
 import { API, safeFetch } from '../api';
 import { Icon } from './ui';
 
-const DEFAULT_ALLOWED_EMAIL = 'isowekesa@gmail.com';
-const ALLOWED_EMAILS = (process.env.REACT_APP_AUTHORIZED_EMAILS || DEFAULT_ALLOWED_EMAIL)
+// List of all authorized owner & admin emails
+const DEFAULT_ALLOWED_EMAILS = [
+  'isowekesa@gmail.com',
+  'angelaaa1ww@gmail.com',
+  'giftedhandsventures@rentals.co.ke'
+];
+
+const envEmails = (process.env.REACT_APP_AUTHORIZED_EMAILS || '')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
+
+const ALLOWED_EMAILS = Array.from(new Set([...DEFAULT_ALLOWED_EMAILS, ...envEmails]));
+
 const GOOGLE_LOAD_TIMEOUT_MS = 10000;
 const GOOGLE_POLL_INTERVAL_MS = 200;
 
@@ -27,7 +36,7 @@ export function GoogleAuthComponent({ onSuccess }) {
       return;
     }
 
-    // Prevent double initialization (important even without StrictMode)
+    // Prevent double initialization
     if (initialized.current) return;
 
     let cancelled = false;
@@ -37,7 +46,7 @@ export function GoogleAuthComponent({ onSuccess }) {
       if (cancelled) return;
 
       if (window.google && window.google.accounts && window.google.accounts.id) {
-        if (initialized.current) return; // double-check guard
+        if (initialized.current) return;
         initialized.current = true;
 
         try {
@@ -101,10 +110,11 @@ export function GoogleAuthComponent({ onSuccess }) {
       );
 
       const userData = JSON.parse(jsonPayload);
+      const userEmail = (userData.email || '').trim().toLowerCase();
 
-      // Verify email against the allowed list
-      if (!ALLOWED_EMAILS.includes((userData.email || '').toLowerCase())) {
-        setError('Access denied. This Google account is not authorized.');
+      // Verify email against authorized list
+      if (!ALLOWED_EMAILS.includes(userEmail)) {
+        setError(`Access denied. The Google account (${userData.email}) is not authorized.`);
         setIsLoading(false);
         return;
       }
@@ -122,7 +132,7 @@ export function GoogleAuthComponent({ onSuccess }) {
         return;
       }
 
-      // Build auth data (IP info kept internally but not displayed)
+      // Build auth data
       const loginTimestamp = new Date().toISOString();
       const authData = {
         email: userData.email,
@@ -137,12 +147,12 @@ export function GoogleAuthComponent({ onSuccess }) {
       localStorage.setItem('authToken', res.token);
       localStorage.setItem('userData', JSON.stringify(authData));
 
-      // Maintain login history (internal only, not displayed)
+      // Maintain login history (internal only)
       const previousLogins = JSON.parse(localStorage.getItem('loginHistory') || '[]');
       previousLogins.push({ timestamp: loginTimestamp });
       localStorage.setItem('loginHistory', JSON.stringify(previousLogins.slice(-10)));
 
-      // Go directly to dashboard — no IP modal
+      // Go directly to dashboard
       onSuccess(authData);
     } catch (err) {
       setError('Authentication failed. Please try again.');
@@ -182,7 +192,7 @@ export function GoogleAuthComponent({ onSuccess }) {
           </button>
           <button
             className="btn-ghost"
-            onClick={() => window.alert('To enable Google Sign-In: set REACT_APP_GOOGLE_CLIENT_ID in your build environment (e.g. Vercel env vars or .env) and rebuild the frontend. If you need help, check the README.')}
+            onClick={() => window.alert('To enable Google Sign-In: set REACT_APP_GOOGLE_CLIENT_ID in your build environment and rebuild the frontend.')}
             style={{ width: '100%', padding: '0.5rem', fontSize: '0.85rem' }}
           >
             Troubleshoot / How to configure
@@ -231,7 +241,6 @@ export function GoogleAuthComponent({ onSuccess }) {
 export function IPVerificationModal({ isOpen, onSkip }) {
   useEffect(() => {
     if (isOpen) {
-      // Auto-skip immediately — no IP verification required
       onSkip();
     }
   }, [isOpen, onSkip]);

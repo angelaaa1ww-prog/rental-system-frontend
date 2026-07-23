@@ -131,10 +131,31 @@ export function EnhancedDashboard({ userData, onLogout }) {
     setRefreshing(false);
   }, [loadDashboard, loadPortfolio]);
 
+  const lastPaymentCountRef = useRef(0);
+
   useEffect(() => {
     loadDashboard();
     loadPortfolio();
-  }, [loadDashboard, loadPortfolio]);
+
+    // Real-time background check for incoming C2B M-Pesa payments
+    const interval = setInterval(async () => {
+      try {
+        const headers = authHeader();
+        const newPayments = await safeFetch(`${API}/api/payments`, { headers });
+        if (Array.isArray(newPayments) && !newPayments.__error) {
+          setPayments(newPayments);
+          if (lastPaymentCountRef.current > 0 && newPayments.length > lastPaymentCountRef.current) {
+            toast('💰 New M-Pesa C2B payment received & processed!', 'success');
+            loadDashboard();
+            loadPortfolio();
+          }
+          lastPaymentCountRef.current = newPayments.length;
+        }
+      } catch (_) {}
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, [loadDashboard, loadPortfolio, toast]);
 
   const toggleTheme = () => {
     const newDark = !dark;

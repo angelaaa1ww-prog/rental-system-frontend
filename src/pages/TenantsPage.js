@@ -53,7 +53,7 @@ function EditTenantModal({ tenant, onClose, onSaved, toast }) {
             <Icon name="x" size={20} />
           </button>
         </div>
-        <form className="form-grid" onSubmit={handleSave}>
+        <form className="form-grid form-grid-modal" onSubmit={handleSave}>
           <Field label="Full name" required>
             <input className="app-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. John Kamau" />
           </Field>
@@ -173,7 +173,7 @@ export default function TenantsPage({ tenants, houses, balances, onRefresh, toas
 
       <section className="surface">
         <div className="section-head"><div><p className="eyebrow">New resident</p><h2>Add a tenant</h2></div></div>
-        <form className="form-grid" onSubmit={(event) => { event.preventDefault(); addTenant(); }}>
+        <form className="form-grid form-grid-tenants" onSubmit={(event) => { event.preventDefault(); addTenant(); }}>
           <Field label="Full name" required><input className="app-input" placeholder="e.g. John Kamau" value={name} onChange={(event) => setName(event.target.value)} /></Field>
           <Field label="Phone number" required><input className="app-input" inputMode="tel" placeholder="e.g. 0712 345 678" value={phone} onChange={(event) => setPhone(event.target.value)} /></Field>
           <Field label="National ID" hint="Optional"><input className="app-input" placeholder="ID number" value={idNumber} onChange={(event) => setIdNumber(event.target.value)} /></Field>

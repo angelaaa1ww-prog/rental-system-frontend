@@ -1,8 +1,8 @@
 import React, { cloneElement, isValidElement, useId } from 'react';
 import {
   AlertTriangle, ArrowUpRight, Bell, Building2, Check, CheckCircle2, CircleDollarSign,
-  CircleX, CreditCard, FileText, House, Info, KeyRound, LockKeyhole, LogOut,
-  Menu, MessageSquare, Moon, Phone, Plus, ReceiptText, RefreshCw, Search,
+  CircleX, CreditCard, Edit, FileText, House, Info, KeyRound, LockKeyhole, LogOut,
+  Menu, MessageSquare, Moon, Pencil, Phone, Plus, ReceiptText, RefreshCw, Search,
   Send, ShieldCheck, SlidersHorizontal, Sun, Trash2, UserRound, UsersRound, X
 } from 'lucide-react';
 import { BrandMark } from './BrandLogo';
@@ -17,6 +17,7 @@ const ICONS = {
   checkCircle: CheckCircle2,
   creditCard: CreditCard,
   dollarSign: CircleDollarSign,
+  edit: Pencil,
   fileText: FileText,
   filter: SlidersHorizontal,
   home: House,
@@ -27,6 +28,7 @@ const ICONS = {
   menu: Menu,
   messageSquare: MessageSquare,
   moon: Moon,
+  pencil: Pencil,
   phone: Phone,
   plus: Plus,
   receipt: ReceiptText,
