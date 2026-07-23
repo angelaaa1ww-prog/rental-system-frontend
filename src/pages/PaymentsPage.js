@@ -57,10 +57,10 @@ export default function PaymentsPage({ payments }) {
             </div>
             <div>
               <strong style={{ fontSize: '.92rem', display: 'block', color: 'var(--ink)' }}>
-                M-Pesa C2B PayBill Active · {c2bConfig?.payBillNumber || '174379'}
+                M-Pesa C2B PayBill Active · Business No. {c2bConfig?.payBillNumber || '400222'}
               </strong>
               <span style={{ fontSize: '.76rem', color: 'var(--muted)' }}>
-                Account Reference Identifier: <strong>House Number (e.g. A101) or House ID</strong> · Hash System Protected
+                Account Format: <strong>{c2bConfig?.accountReferenceFormat || '1183070#<HouseNumber> (e.g. 1183070#A101)'}</strong> · Hash System Protected
               </span>
             </div>
           </div>
