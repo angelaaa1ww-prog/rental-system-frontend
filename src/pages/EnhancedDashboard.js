@@ -47,7 +47,6 @@ export function EnhancedDashboard({ userData, onLogout }) {
   const [dark, setDark] = useState(() => document.documentElement.getAttribute('data-theme') === 'dark');
   const compact = useViewport();
 
-  const [houses, setHouses] = useState([]);
   const [houses, setHouses] = useState(() => {
     try {
       const cached = sessionStorage.getItem('ghv_houses');
