@@ -12,13 +12,6 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
   const [page, setPage] = useState(1);
   const [c2bConfig, setC2bConfig] = useState(null);
 
-  // Simulation modal state
-  const [showSimModal, setShowSimModal] = useState(false);
-  const [simulating, setSimulating] = useState(false);
-  const [simHouse, setSimHouse] = useState('');
-  const [simAmount, setSimAmount] = useState('1000');
-  const [simResult, setSimResult] = useState(null);
-
   // Delete modal state
   const [deleteConfirm, setDeleteConfirm] = useState(null); // { mode: 'single' | 'selected' | 'all', id?: string }
   const [deleting, setDeleting] = useState(false);
@@ -28,27 +21,6 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
       if (res && !res.__error) setC2bConfig(res);
     });
   }, []);
-
-  const handleSimulate = async (e) => {
-    e.preventDefault();
-    setSimulating(true);
-    setSimResult(null);
-    try {
-      const ref = simHouse.trim() ? `1183070#${simHouse.trim()}` : '';
-      const url = `${API}/api/c2b/simulate?amount=${simAmount}&billRefNumber=${encodeURIComponent(ref)}`;
-      const res = await safeFetch(url);
-      if (res && !res.__error && res.response?.ResponseCode === "0") {
-        setSimResult({ type: 'success', msg: `✅ M-Pesa Payment of KES ${Number(simAmount).toLocaleString()} simulated! Check ledger below.` });
-        if (onRefresh) onRefresh();
-      } else {
-        setSimResult({ type: 'error', msg: res?.message || res?.error || 'Simulation request completed with notice' });
-      }
-    } catch (err) {
-      setSimResult({ type: 'error', msg: err.message });
-    } finally {
-      setSimulating(false);
-    }
-  };
 
   const executeDelete = async () => {
     if (!deleteConfirm) return;
@@ -146,12 +118,9 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
         <div className="page-title-copy">
           <p className="eyebrow">Transaction ledger</p>
           <h2>Payments</h2>
-          <p>Review automated M-Pesa C2B PayBill payments, manual cash entries, and manage payment history.</p>
+          <p>Live automated M-Pesa C2B PayBill payments and manual cash entries with instant ledger updates.</p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn-outline btn-sm" onClick={() => setShowSimModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Icon name="play" size={14} /> Simulate M-Pesa Payment
-          </button>
           {payments.length > 0 && (
             <button 
               className="btn-outline btn-danger btn-sm" 
@@ -166,7 +135,7 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
         </div>
       </header>
 
-      {/* C2B PayBill Status Banner */}
+      {/* C2B Live Production PayBill Banner */}
       <section className="surface" style={{ background: 'var(--surface-soft)', borderLeft: '4px solid var(--primary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -175,18 +144,16 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
             </div>
             <div>
               <strong style={{ fontSize: '.92rem', display: 'block', color: 'var(--ink)' }}>
-                M-Pesa C2B PayBill Active · Business No. {c2bConfig?.payBillNumber || '400222'}
+                Live M-Pesa C2B PayBill Active · Business No. {c2bConfig?.payBillNumber || '400222'}
               </strong>
               <span style={{ fontSize: '.76rem', color: 'var(--muted)' }}>
-                Account Format: <strong>{c2bConfig?.accountReferenceFormat || '1183070#<HouseNumber> (e.g. 1183070#A101)'}</strong> · Hash System Protected
+                Account Format: <strong>{c2bConfig?.accountReferenceFormat || '1183070#<HouseNumber> (e.g. 1183070#A101)'}</strong> · Production Webhooks Configured
               </span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-primary btn-sm" onClick={() => setShowSimModal(true)}>
-              🧪 Test PayBill Simulation
-            </button>
-            <span className="tag tag-success"><Icon name="checkCircle" size={12} /> Auto-Reflect Active</span>
+            <span className="tag tag-success"><Icon name="checkCircle" size={12} /> Live Production</span>
+            <span className="tag tag-success"><Icon name="refresh" size={12} /> Auto-Reflect Active</span>
             <span className="tag tag-neutral"><Icon name="shield" size={12} /> Hash Token Secured</span>
           </div>
         </div>
@@ -302,50 +269,10 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
           <EmptyState 
             icon="creditCard" 
             title={payments.length ? 'No matching payments' : 'No payments yet'} 
-            sub={payments.length ? 'Try another search term or payment method.' : 'Payments you record will appear here.'} 
+            sub={payments.length ? 'Try another search term or payment method.' : 'Live M-Pesa C2B PayBill payments from tenants will automatically appear here.'} 
           />
         )}
       </section>
-
-      {/* Built-in M-Pesa C2B Simulation Modal */}
-      {showSimModal && (
-        <div className="modal-backdrop" onClick={() => setShowSimModal(false)}>
-          <div className="modal-content animate-fade-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
-            <header className="modal-header">
-              <h3>🧪 Simulate M-Pesa C2B Payment</h3>
-              <button className="icon-button" onClick={() => setShowSimModal(false)}><Icon name="x" size={18} /></button>
-            </header>
-            <form onSubmit={handleSimulate} style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '16px 0' }}>
-              <p style={{ fontSize: '.84rem', color: 'var(--muted)', margin: 0 }}>
-                Triggers a simulated Safaricom C2B PayBill transaction. The system matches the house number and links the payment automatically.
-              </p>
-              
-              {simResult && (
-                <div style={{ padding: '10px 14px', borderRadius: 8, fontSize: '.84rem', background: simResult.type === 'success' ? 'var(--success-soft)' : 'var(--danger-soft)', color: simResult.type === 'success' ? 'var(--success)' : 'var(--danger)' }}>
-                  {simResult.msg}
-                </div>
-              )}
-
-              <div>
-                <label style={{ fontSize: '.8rem', fontWeight: 600, display: 'block', marginBottom: 4 }}>House Number (Optional)</label>
-                <input className="app-input" value={simHouse} onChange={(e) => setSimHouse(e.target.value)} placeholder="e.g. A101 (Leave empty for auto-match)" />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '.8rem', fontWeight: 600, display: 'block', marginBottom: 4 }}>Amount (KES)</label>
-                <input className="app-input" type="number" value={simAmount} onChange={(e) => setSimAmount(e.target.value)} required min="1" />
-              </div>
-
-              <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-                <button type="button" className="btn-outline" onClick={() => setShowSimModal(false)}>Close</button>
-                <button type="submit" className="btn-primary" disabled={simulating}>
-                  {simulating ? 'Processing...' : '⚡ Send Test Payment'}
-                </button>
-              </footer>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
