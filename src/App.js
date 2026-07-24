@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { LoginPage } from './pages/LoginPage';
 import { EnhancedDashboard } from './pages/EnhancedDashboard';
 import { LoadingScreen } from './components/BrandLogo';
+import { OfflineBanner } from './components/OfflineBanner';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,6 +43,7 @@ function App() {
 
   return (
     <>
+      <OfflineBanner />
       {!sessionReady ? <LoadingScreen /> : !isAuthenticated ? <LoginPage onLoginSuccess={handleLoginSuccess} /> : <EnhancedDashboard userData={userData} onLogout={handleLogout} />}
       <Analytics />
     </>

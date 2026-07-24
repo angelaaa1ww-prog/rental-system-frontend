@@ -7,6 +7,7 @@ import PaymentsPage from './PaymentsPage';
 import ReportsPage from './ReportsPage';
 import SmsPage from './SmsPage';
 import { Icon as AppIcon } from '../components/ui';
+import { OfflineBanner } from '../components/OfflineBanner';
 
 function IconButton({ icon, label, className = '', onClick, ...props }) {
   return (
@@ -47,14 +48,30 @@ export function EnhancedDashboard({ userData, onLogout }) {
   const compact = useViewport();
 
   const [houses, setHouses] = useState([]);
-  const [tenants, setTenants] = useState([]);
+  const [houses, setHouses] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('ghv_houses');
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) { return []; }
+  });
+  const [tenants, setTenants] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('ghv_tenants');
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) { return []; }
+  });
   const [balances, setBalances] = useState({});
   const [payments, setPayments] = useState([]);
   const [reminders, setReminders] = useState([]);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('ghv_dashboard');
+      return cached ? JSON.parse(cached) : null;
+    } catch (_) { return null; }
+  });
+  const [dashboardLoading, setDashboardLoading] = useState(!dashboardData);
   const [dashboardError, setDashboardError] = useState(null);
-  const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const [portfolioLoading, setPortfolioLoading] = useState(!houses.length && !tenants.length);
   const [portfolioError, setPortfolioError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -71,7 +88,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   const loadDashboard = useCallback(async () => {
-    setDashboardLoading(true);
+    if (!dashboardData) setDashboardLoading(true);
 
     try {
       const headers = authHeader();
@@ -81,25 +98,30 @@ export function EnhancedDashboard({ userData, onLogout }) {
         safeFetch(`${API}/api/sms/reminders`, { headers })
       ]);
 
-      if (dashboardResponse?.__error || !dashboardResponse || typeof dashboardResponse !== 'object') {
-        setDashboardError(dashboardResponse?.message || 'Dashboard data could not be loaded.');
-      } else {
+      if (!dashboardResponse?.__error && dashboardResponse && typeof dashboardResponse === 'object') {
         setDashboardData(dashboardResponse);
         setDashboardError(null);
+        try { sessionStorage.setItem('ghv_dashboard', JSON.stringify(dashboardResponse)); } catch (_) {}
+      } else if (!dashboardData) {
+        setDashboardError(dashboardResponse?.message || 'Connecting to backend server...');
       }
 
-      if (!paymentResponse?.__error) setPayments(Array.isArray(paymentResponse) ? paymentResponse : []);
-      if (!reminderResponse?.__error) setReminders(Array.isArray(reminderResponse) ? reminderResponse : []);
+      if (!paymentResponse?.__error && Array.isArray(paymentResponse)) {
+        setPayments(paymentResponse);
+      }
+      if (!reminderResponse?.__error && Array.isArray(reminderResponse)) {
+        setReminders(reminderResponse);
+      }
     } catch (error) {
       console.error('Dashboard load failed:', error);
-      setDashboardError('Dashboard data could not be loaded.');
+      if (!dashboardData) setDashboardError('Dashboard data could not be synced.');
     } finally {
       setDashboardLoading(false);
     }
-  }, []);
+  }, [dashboardData]);
 
   const loadPortfolio = useCallback(async () => {
-    setPortfolioLoading(true);
+    if (!houses.length && !tenants.length) setPortfolioLoading(true);
 
     try {
       const headers = authHeader();
@@ -109,21 +131,35 @@ export function EnhancedDashboard({ userData, onLogout }) {
         safeFetch(`${API}/api/payments/balances`, { headers })
       ]);
 
-      const hasPropertyError = houseResponse?.__error || tenantResponse?.__error;
-      setPortfolioError(hasPropertyError ? 'Property records could not be fully loaded. Please refresh and try again.' : null);
+      if (!houseResponse?.__error && Array.isArray(houseResponse)) {
+        setHouses(houseResponse);
+        try { sessionStorage.setItem('ghv_houses', JSON.stringify(houseResponse)); } catch (_) {}
+      }
 
-      if (!houseResponse?.__error) setHouses(Array.isArray(houseResponse) ? houseResponse : []);
-      if (!tenantResponse?.__error) setTenants(Array.isArray(tenantResponse) ? tenantResponse : []);
+      if (!tenantResponse?.__error && Array.isArray(tenantResponse)) {
+        setTenants(tenantResponse);
+        try { sessionStorage.setItem('ghv_tenants', JSON.stringify(tenantResponse)); } catch (_) {}
+      }
+
       if (!balanceResponse?.__error && balanceResponse && typeof balanceResponse === 'object') {
         setBalances(balanceResponse);
       }
+
+      const hasPropertyError = houseResponse?.__error || tenantResponse?.__error;
+      if (!hasPropertyError) {
+        setPortfolioError(null);
+      } else if (!houses.length && !tenants.length) {
+        setPortfolioError('Property records are syncing from server. Please wait...');
+      }
     } catch (error) {
       console.error('Portfolio load failed:', error);
-      setPortfolioError('Property records could not be loaded. Please refresh and try again.');
+      if (!houses.length && !tenants.length) {
+        setPortfolioError('Property records could not be synced.');
+      }
     } finally {
       setPortfolioLoading(false);
     }
-  }, []);
+  }, [houses.length, tenants.length]);
 
   const refreshWorkspace = useCallback(async () => {
     setRefreshing(true);
@@ -186,7 +222,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
     }
     if (activeTab === 'properties') return <HousesPage houses={houses} apartments={['A', 'B', 'C', 'D', 'E']} loading={portfolioLoading} error={portfolioError} onRefresh={loadPortfolio} toast={toast} />;
     if (activeTab === 'tenants') return <TenantsPage tenants={tenants} houses={houses} balances={balances} loading={portfolioLoading} error={portfolioError} onRefresh={loadPortfolio} toast={toast} />;
-    if (activeTab === 'payments') return <PaymentsPage payments={payments} />;
+    if (activeTab === 'payments') return <PaymentsPage payments={payments} onRefresh={refreshWorkspace} toast={toast} />;
     if (activeTab === 'reports') return <ReportsPage toast={toast} />;
     if (activeTab === 'sms') return <SmsPage tenants={tenants} balances={balances} toast={toast} />;
     return <Dashboard onPageChange={handleNav} reminders={reminders} payments={payments} data={dashboardData} loading={dashboardLoading} error={dashboardError} onRefresh={loadDashboard} refreshing={dashboardLoading} />;
@@ -194,6 +230,7 @@ export function EnhancedDashboard({ userData, onLogout }) {
 
   return (
     <>
+      <OfflineBanner onReconnect={refreshWorkspace} />
       <div className="app-shell">
         {compact && sidebar && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setSidebar(false)} />}
 
