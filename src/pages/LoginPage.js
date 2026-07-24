@@ -60,45 +60,50 @@ export function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <main className="auth-screen">
-      <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" className="floating-theme" onClick={onTheme} />
+    <main className="auth-screen glass-theme">
+      {/* Ambient background glass orbs */}
+      <div className="glass-orb glass-orb-primary" />
+      <div className="glass-orb glass-orb-accent" />
+      <div className="glass-orb glass-orb-secondary" />
+
+      <IconButton icon={dark ? 'sun' : 'moon'} label="Toggle theme" className="floating-theme glass-button" onClick={onTheme} />
+      
       <section className="auth-layout">
         <div className="auth-story">
-          <span className="brand-mark large" style={{ fontSize: '1.8rem', fontWeight: 900, background: 'var(--primary)', color: '#fff', borderRadius: 16, width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-1px' }}>
-            GH
-          </span>
-          <p className="eyebrow">Gifted Hands Ventures</p>
+          <div className="brand-header">
+            <span className="brand-mark-glass">GH</span>
+            <span className="glass-pill-eyebrow">Gifted Hands Ventures</span>
+          </div>
           <h1>A clearer way to run your rental portfolio.</h1>
           <p>
             Manage properties, tenant records, rent collection, and communication from a secure, focused workspace.
           </p>
           <div className="auth-stats" aria-label="Security highlights">
-            <span><AppIcon name="shield" size={16} /> Restricted access</span>
-            <span><AppIcon name="key" size={16} /> Secure sign-in</span>
-            <span><AppIcon name="bell" size={16} /> Login security</span>
+            <span className="glass-badge"><AppIcon name="shield" size={16} /> Restricted access</span>
+            <span className="glass-badge"><AppIcon name="key" size={16} /> Secure sign-in</span>
+            <span className="glass-badge"><AppIcon name="bell" size={16} /> Login security</span>
           </div>
         </div>
 
-        <div className="auth-card">
+        <div className="auth-card glass-card">
           <div className="auth-form">
-            <span className="mini-mark" style={{ fontSize: '1.1rem', fontWeight: 800, background: 'var(--primary)', color: '#fff', borderRadius: 10, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-0.5px' }}>
-              GH
-            </span>
+            <span className="mini-mark-glass">GH</span>
             <h2>Owner sign-in</h2>
             <p>Access is limited to authorized users.</p>
             
             {termsAccepted ? (
-              <div style={{ marginTop: '0.5rem' }}>
+              <div className="auth-google-wrapper">
                 <GoogleAuthComponent onSuccess={handleGoogleSuccess} />
               </div>
             ) : (
-              <Button type="button" className="full-width" onClick={() => setShowTerms(true)}>
+              <Button type="button" className="full-width glass-cta" onClick={() => setShowTerms(true)}>
                 View Terms &amp; Privacy to continue
               </Button>
             )}
 
-            <div className="legal-links" style={{ marginTop: '1rem' }}>
+            <div className="legal-links">
               <button type="button" onClick={() => setShowTerms(true)}>Terms</button>
+              <span className="dot-divider">•</span>
               <button type="button" onClick={() => setShowTerms(true)}>Privacy</button>
             </div>
           </div>
