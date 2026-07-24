@@ -58,7 +58,18 @@ export function Field({ label, children, hint, required = false }) {
   const generatedId = useId();
   const controlId = children?.props?.id || generatedId;
   const control = isValidElement(children) ? cloneElement(children, { id: controlId, 'aria-required': required || undefined }) : children;
-  return <div className="field"><label htmlFor={controlId}>{label}{required && <span aria-hidden="true"> *</span>}</label>{control}{hint && <small className="field-hint">{hint}</small>}</div>;
+  return (
+    <div className="field">
+      <div className="field-header">
+        <label htmlFor={controlId}>
+          {label}
+          {required && <span aria-hidden="true" style={{ color: 'var(--danger)' }}> *</span>}
+        </label>
+        {hint && <span className="field-hint">{hint}</span>}
+      </div>
+      {control}
+    </div>
+  );
 }
 
 export function MiniStat({ label, value, color }) {
