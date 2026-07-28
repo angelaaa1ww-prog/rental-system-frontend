@@ -26,11 +26,16 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
     if (!deleteConfirm) return;
     setDeleting(true);
 
+    // #region agent log
+    fetch('http://127.0.0.1:7893/ingest/33a576fc-95cc-4368-8b78-8cbdb5070f48',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e989aa'},body:JSON.stringify({sessionId:'e989aa',runId:'pre-fix',hypothesisId:'C',location:'PaymentsPage.js:executeDelete:start',message:'delete started',data:{mode:deleteConfirm.mode,id:deleteConfirm.id||null,selectedCount:selected.size,paymentsBefore:payments.length,hasToken:!!authHeader().Authorization},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
     try {
       const headers = { 'Content-Type': 'application/json', ...authHeader() };
+      let res = null;
 
       if (deleteConfirm.mode === 'single' && deleteConfirm.id) {
-        const res = await safeFetch(`${API}/api/payments/${deleteConfirm.id}`, { method: 'DELETE', headers: authHeader() });
+        res = await safeFetch(`${API}/api/payments/${deleteConfirm.id}`, { method: 'DELETE', headers: authHeader() });
         if (res?.__error) {
           if (toast) toast(res.message || 'Failed to delete payment', 'error');
         } else {
@@ -40,7 +45,7 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
         }
       } else if (deleteConfirm.mode === 'selected') {
         const ids = Array.from(selected);
-        const res = await safeFetch(`${API}/api/payments/bulk-delete`, {
+        res = await safeFetch(`${API}/api/payments/bulk-delete`, {
           method: 'POST',
           headers,
           body: JSON.stringify({ ids })
@@ -53,7 +58,7 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
           if (onRefresh) onRefresh();
         }
       } else if (deleteConfirm.mode === 'all') {
-        const res = await safeFetch(`${API}/api/payments/clear/all`, { method: 'DELETE', headers: authHeader() });
+        res = await safeFetch(`${API}/api/payments/clear/all`, { method: 'DELETE', headers: authHeader() });
         if (res?.__error) {
           if (toast) toast(res.message || 'Failed to clear payment records', 'error');
         } else {
@@ -62,7 +67,14 @@ export default function PaymentsPage({ payments, onRefresh, toast }) {
           if (onRefresh) onRefresh();
         }
       }
+
+      // #region agent log
+      fetch('http://127.0.0.1:7893/ingest/33a576fc-95cc-4368-8b78-8cbdb5070f48',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e989aa'},body:JSON.stringify({sessionId:'e989aa',runId:'pre-fix',hypothesisId:'A,B',location:'PaymentsPage.js:executeDelete:response',message:'delete response',data:{mode:deleteConfirm.mode,resIsNull:res===null,resIsUndefined:res===undefined,hasError:!!res?.__error,status:res?.status||null,message:res?.message||null,treatedAsSuccess:!res?.__error},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7893/ingest/33a576fc-95cc-4368-8b78-8cbdb5070f48',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e989aa'},body:JSON.stringify({sessionId:'e989aa',runId:'pre-fix',hypothesisId:'A',location:'PaymentsPage.js:executeDelete:catch',message:'delete threw',data:{error:String(err?.message||err)},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       if (toast) toast('Failed to delete payment records', 'error');
     } finally {
       setDeleting(false);

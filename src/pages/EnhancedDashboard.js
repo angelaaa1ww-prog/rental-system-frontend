@@ -105,6 +105,9 @@ export function EnhancedDashboard({ userData, onLogout }) {
         setDashboardError(dashboardResponse?.message || 'Connecting to backend server...');
       }
 
+      // #region agent log
+      fetch('http://127.0.0.1:7893/ingest/33a576fc-95cc-4368-8b78-8cbdb5070f48',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e989aa'},body:JSON.stringify({sessionId:'e989aa',runId:'pre-fix',hypothesisId:'B,E',location:'EnhancedDashboard.js:loadDashboard:payments',message:'payments refresh result',data:{isNull:paymentResponse===null,isArray:Array.isArray(paymentResponse),hasError:!!paymentResponse?.__error,count:Array.isArray(paymentResponse)?paymentResponse.length:null,status:paymentResponse?.status||null,currentPayments:payments.length},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       if (!paymentResponse?.__error && Array.isArray(paymentResponse)) {
         setPayments(paymentResponse);
       }
