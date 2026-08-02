@@ -76,7 +76,7 @@ export function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setEmailError('');
     setPasswordError('');
@@ -101,21 +101,35 @@ export function LoginPage({ onLoginSuccess }) {
 
     setIsLoading(true);
 
-    // Simulate login for direct form submission or fallback to Whitelisted Auth
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://rental-system-backend-1t05.onrender.com';
+      const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
+      const res = await fetch(`${base}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.token) {
+        setPasswordError(data.message || 'Invalid email or password. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Store token consistently
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('authToken', data.token);
+      const authData = { email, name: data.user?.name || 'Owner', token: data.token, ...data.user };
+      localStorage.setItem('userData', JSON.stringify(authData));
+
       setIsSuccess(true);
-      setTimeout(() => {
-        onLoginSuccess({
-          user: {
-            name: 'Gifted Hands Owner',
-            email: email,
-            role: 'owner'
-          },
-          token: 'jwt-session-token-ghv'
-        });
-      }, 1000);
-    }, 1200);
+      setTimeout(() => onLoginSuccess(authData), 900);
+    } catch (err) {
+      setPasswordError('Unable to reach the server. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

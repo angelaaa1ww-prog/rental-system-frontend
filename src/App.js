@@ -11,7 +11,7 @@ function App() {
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     const storedUserData = localStorage.getItem('userData');
 
     if (token && storedUserData) {
@@ -20,7 +20,7 @@ function App() {
         setIsAuthenticated(true);
       } catch (err) {
         console.error('Failed to restore session:', err);
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('userData');
       }
     }
